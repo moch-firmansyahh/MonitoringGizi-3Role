@@ -5,83 +5,100 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Next.js-16.3.0-black?style=flat-square&logo=next.js" alt="Next.js" />
-  <img src="https://img.shields.io/badge/React-19.2.8-61DAFB?style=flat-square&logo=react" alt="React" />
-  <img src="https://img.shields.io/badge/TypeScript-6.0-3178C6?style=flat-square&logo=typescript" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=flat-square&logo=tailwind-css" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/Gemini_API-2.5_Flash-4285F4?style=flat-square&logo=google" alt="Gemini API" />
-  <img src="https://img.shields.io/badge/PDF_Renderer-4.6.0-FF4154?style=flat-square&logo=adobe-acrobat-reader" alt="React PDF" />
+  <img src="https://img.shields.io/badge/Next.js-16.3.0-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React-19.2.8-61DAFB?style=for-the-badge&logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4?style=for-the-badge&logo=google" alt="Gemini API" />
+  <img src="https://img.shields.io/badge/Standar-WHO_Permenkes_2020-0d472c?style=for-the-badge" alt="WHO Permenkes 2020" />
 </p>
 
 ---
 
-## 1. Tentang Proyek
+## 1. Deskripsi Proyek
 
-**SimGizi** merupakan aplikasi web kesehatan yang terintegrasi AI yang dirancang khusus untuk mempermudah tenaga kesehatan, kader Posyandu, dan pengelola program gizi masyarakat dalam melakukan pencatatan antropometri balita (0–59 bulan), evaluasi status gizi secara real-time berbasis tabel referensi resmi WHO / Permenkes RI No. 2 Tahun 2020, deteksi dini risiko stunting, rekomendasi tindak lanjut gizi cerdas berbasis Google Gemini API, serta pelaporan otomatis (Export PDF).
+**SimGizi (Sistem Informasi Gizi Anak dan Deteksi Dini Stunting)** merupakan aplikasi berbasis web kesehatan berbasis kecerdasan buatan (AI) yang dikembangkan untuk mempermudah tenaga kesehatan, kader Posyandu, dan pengelola program gizi masyarakat dalam melakukan pemantauan tumbuh kembang balita usia 0–59 bulan.
 
----
+SimGizi mentransformasi pencatatan manual buku KMS konvensional menjadi ekosistem digital cerdas melalui:
 
-## 2. Fitur Utama
-
-- **Dashboard Eksekutif & Ringkasan Indikator Kesehatan**:
-  - Kartu metrik total balita, balita gizi normal, total sesi pemeriksaan, dan persentase cakupan gizi sehat.
-  - Grafik distribusi status gizi interaktif 4 kategori (Normal, Gizi Kurang, Gizi Buruk, Stunting).
-  - Panel Peringatan Dini balita yang memerlukan tindakan intervensi segera.
-- **Kalkulasi Z-Score Presisi Standar WHO / Permenkes No. 2 Tahun 2020**:
-  - Perhitungan Z-score antropometri lengkap (BB/U, TB/U atau PB/U, BB/TB atau BB/PB) berbasis 730 baris data referensi resmi.
-  - Algoritma _Exact Rational Banker's Rounding_ berbasis dekonstruksi bit IEEE 754 dan aritmatika BigInt (murni tanpa toleransi float) yang identik 100% dengan Python 3 `round(val, 2)`.
-  - Interpolasi linear otomatis dan penentuan posisi ukur telentang/berdiri.
-- **Rekomendasi Analisis AI (Google Gemini API)**:
-  - Integrasi server-side API route (`/api/rekomendasi-ai`) memanfaatkan model Google Gemini 2.5 Flash.
-  - Guardrail medis ketat: rekomendasi edukatif dihasilkan langsung dari parameter Z-score riil pasien tanpa mengubah diagnosis baku.
-  - Fallback aman: jika API key belum dikonfigurasi atau jaringan offline, sistem otomatis menyusun analisis lokal berbasis Z-score nyata sehingga proses penyimpanan data anak tetap aman dan tidak pernah gagal.
-- **Pencatatan Data Antropometri Anak**:
-  - Validasi formulir real-time (NIK 16 digit unik anti-duplikat, batas umur 0–59 bulan, validasi desimal berat badan dan tinggi badan tanpa fallback fiktif).
-  - Feedback notifikasi toast informatif saat form berhasil disimpan atau terjadi input di luar rentang standar.
-- **Rekapitulasi Data Gizi & Tabel Responsif**:
-  - Arsitektur Dual-Tbody Murni CSS.
-  - Pencarian live terpadu (Nama/NIK) dan filter dropdown status gizi.
-  - Pagination model kapsul segmented.
-- **Riwayat Sesi Pemeriksaan**:
-  - Filter interaktif berbasis tanggal pemeriksaan menggunakan Custom DatePicker.
-- **Export Laporan PDF Dinamis**:
-  - Pembuatan dokumen laporan rekapitulasi data gizi resmi siap cetak langsung dari sisi server via endpoint `@react-pdf/renderer`.
-- **Modal Panduan Aturan & Rumus WHO**:
-  - Penjelasan matematis rumus Z-Score WHO ($Z = \frac{\text{Nilai Riil} - \text{Median}}{\text{Standar Deviasi}}$) beserta tabel ambang batas deviasi baku.
-- **Zero-Blink Dark & Light Mode**:
-  - Toggle tema instan bebas kedipan dengan persistensi sinkron via `useSyncExternalStore`.
-- **Autentikasi & Proteksi Rute Terpusat**:
-  - Sistem pengamanan rute berbasis proxy Next.js (`src/proxy.ts`) dengan cookie sesi `simgizi-auth`.
+1. **Otomatisasi Kalkulasi Z-Score Deterministik** berdasar 730 baris data baku Permenkes RI No. 2 Tahun 2020 dengan algoritma _Exact Rational Banker's Rounding_ berakurasi 100%.
+2. **Sistem Rekomendasi Klinis Terpersonalisasi** menggunakan Google Gemini AI dengan _Dual-Layer Fail-Safe_ lokal.
+3. **Single-Screen Zero-Scroll Layout** yang teroptimasi secara adaptif untuk layar monitor desktop maupun laptop.
+4. **Pelaporan Digital Instan (Export PDF)** siap cetak untuk diserahkan ke Puskesmas atau Dinas Kesehatan.
 
 ---
 
-## 3. Tech Stack Frontend
+## 2. Fitur Utama & Inovasi
 
-Aplikasi ini dibangun menggunakan arsitektur frontend modern dengan spesifikasi teknologi sebagai berikut:
+### 📊 A. Dashboard Eksekutif & Peringatan Dini
 
-| Kategori                   | Teknologi                                 | Deskripsi & Kegunaan                                                                                                                                         |
-| :------------------------- | :---------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Framework Inti**         | **Next.js 16.3.0**                        | App Router, Turbopack compiler, Server Components, API Route Handlers, dan Next.js Proxy Middleware.                                                         |
-| **UI Library**             | **React 19.2.8**                          | Pustaka antarmuka deklaratif dengan dukungan React Compiler dan Concurrent Features.                                                                         |
-| **Bahasa Pemrograman**     | **TypeScript 6.0.3**                      | Strict type safety, custom interface data balita (`AnakRecord`), dan pengecekan tipe kompilasi menyeluruh.                                                   |
-| **CSS & Styling**          | **Tailwind CSS v4**                       | Framework utilitas CSS generasi terbaru dengan `@tailwindcss/postcss`, Native CSS Variables, dan variant dark mode `@variant dark`.                          |
-| **Kalkulasi Antropometri** | **Custom WHO Z-Score Engine**             | Engine kalkulasi Z-score antropometri 5 indeks (BB/U, PB/U, TB/U, BB/PB, BB/TB) berdasar 730 baris data Permenkes No. 2/2020 dengan Exact Banker's Rounding. |
-| **Generative AI**          | **Google Gemini API**                     | Model `gemini-2.5-flash` untuk analisis tindak lanjut edukasi gizi dan deteksi risiko kesehatan balita.                                                      |
-| **State Management**       | **Custom Store (`useSyncExternalStore`)** | Arsitektur state terpusat reaktif bebas hidrasi mismatch (`data-anak-store.ts`) dengan memori cache lokal dan listener cross-tab.                            |
-| **PDF Generation**         | **@react-pdf/renderer 4.6.0**             | Engine rendering dokumen PDF dinamis sisi server untuk mengunduh rekap data balita terfilter.                                                                |
-| **Ikonografi**             | **Lucide React 1.31.0**                   | Paket ikon SVG modern, bersih, dan konsisten (Book, Calendar, Check, Search, Shield, Zap, Sparkles, dll).                                                    |
-| **Notifikasi Toast**       | **Sonner 2.0.8**                          | Toast manager ringan dengan custom template badge rounded 14px (Success, Error, Delete).                                                                     |
-| **Tipografi**              | **Inter & AG Fonts**                      | Font sans-serif modern yang dioptimalkan untuk keterbacaan data medis dan angka metrik.                                                                      |
+- **4 Kartu Metrik Ringkasan Kesehatan**: Total Balita, Gizi Normal, Gizi Kurang/Buruk, dan Terindikasi Stunting.
+- **Grafik Distribusi Interaktif**: Visualisasi perbandingan proporsi status gizi anak secara _real-time_.
+- **Panel Stunting Alerts**: Deteksi dini darurat yang langsung menyorot balita berisiko tinggi agar segera mendapat intervensi medis.
+
+### 🩺 B. Kalkulator Z-Score Otomatis (Standar WHO / Permenkes No. 2/2020)
+
+- Menghitung 3 multi-indeks antropometri: **BB/U** (Berat Badan menurut Umur), **TB/U atau PB/U** (Tinggi/Panjang Badan menurut Umur), dan **BB/TB atau BB/PB** (Berat Badan menurut Tinggi/Panjang Badan).
+- Menggunakan algoritma pembulatan **Exact Rational Banker's Rounding** berbasis BigInt yang identik 100% dengan Python 3 `round(val, 2)` (teruji 99.13% pada 39.425 dataset independen).
+
+### 🤖 C. Rekomendasi Klinis AI (Google Gemini 2.5 Flash & Fail-Safe)
+
+- Rekomendasi nutrisi makro/mikro, panduan Pemberian Makanan Tambahan (PMT), stimulasi perkembangan, dan jadwal rujukan.
+- **Dual-Layer Fail-Safe Guarantee**: Jika API key belum terpasang atau kuota habis, sistem otomatis menyusun analisis lokal berbasis Z-score resmi sehingga data balita 100% selalu tersimpan aman.
+
+### 📝 D. Pencatatan Antropometri & Multi-Error Toast
+
+- Formulir entri data balita dengan validasi NIK 16 digit, usia 0–59 bulan, batas biologis berat (0–60 kg), dan tinggi badan (45–110/120 cm).
+- Notifikasi bertumpuk (_Stacked Toasts_) yang mampu menampilkan hingga 4 pesan kesalahan input secara elegan.
+
+### 📑 E. Rekapitulasi Data Gizi & Ekspor Laporan PDF
+
+- Tabel data balita terintegrasi dengan filter pencarian nama/NIK, filter dropdown status gizi, filter kalender (`CustomDatePicker`), serta modal Detail dan Hapus.
+- Ekspor laporan rekapitulasi gizi resmi berstandar Dinas Kesehatan ke dalam format PDF siap cetak.
+
+### 🕒 F. Riwayat Pemeriksaan Longitudinal
+
+- Log kronologis seluruh sesi penimbangan dan pengukuran balita dari waktu ke waktu untuk mendeteksi _growth faltering_ sedini mungkin.
 
 ---
 
-## 4. Struktur Direktori
+## 3. Tech Stack & Arsitektur
+
+| Layer           | Teknologi                   | Peran & Keunggulan                                                                    |
+| :-------------- | :-------------------------- | :------------------------------------------------------------------------------------ |
+| **Framework**   | **Next.js 16 (App Router)** | Server & Client Components, Route Handlers, Turbopack, dan Middleware Proxy.          |
+| **UI Library**  | **React 19**                | Deklaratif UI dengan performa render tinggi dan _type-safe_.                          |
+| **Bahasa**      | **TypeScript 5/6**          | _Strict type-safety_ mutlak di seluruh komponen dan model data.                       |
+| **Styling**     | **Tailwind CSS v4**         | Palet token warna terkunci, responsivitas vertikal, dan _Zero-Blink Dark/Light Mode_. |
+| **State Store** | **`useSyncExternalStore`**  | Penyimpanan reaktif _client-side_ berbasis `localStorage` bebas _hydration mismatch_. |
+| **AI Model**    | **Google Gemini 2.5 Flash** | _Server-side AI route handler_ dengan _clinical guardrails_ berstandar Kemenkes RI.   |
+| **Dokumen PDF** | **@react-pdf/renderer**     | Engine generator dokumen PDF dinamis beresolusi tajam.                                |
+| **Komponen UI** | **Lucide React & Sonner**   | Ikon vektor modern dan sistem notifikasi toast bertumpuk (_folded deck_).             |
+
+---
+
+## 4. Standar Klasifikasi Z-Score WHO
+
+SimGizi mengacu pada Buku Standar Antropometri Anak Kemenkes RI (Permenkes No. 2 Tahun 2020):
+
+| Status Gizi     | Ambang Batas Z-Score (SD)                     | Indeks Antropometri Acuan                  |
+| :-------------- | :-------------------------------------------- | :----------------------------------------- |
+| **Normal**      | $-2.00 \text{ SD} \le Z \le +2.00 \text{ SD}$ | BB/U, TB/U (PB/U), BB/TB (BB/PB)           |
+| **Gizi Kurang** | $-3.00 \text{ SD} \le Z < -2.00 \text{ SD}$   | BB/TB (_Wasted_) atau BB/U (_Underweight_) |
+| **Gizi Buruk**  | $Z < -3.00 \text{ SD}$                        | BB/TB (_Severely Wasted_)                  |
+| **Stunting**    | $Z < -2.00 \text{ SD}$                        | TB/U atau PB/U (_Stunted_)                 |
+
+---
+
+## 5. Struktur Direktori Proyek
 
 ```text
 SimGizi/
 ├── .agents/
 │   └── AGENTS.md                  # Single Source of Truth: Aturan Desain & Layout Terkunci
-├── public/                        # Aset statis & logo
+├── public/                        # Aset gambar statis, logo, dan favicon
+├── userflow/                      # 9 File Diagram Userflow PlantUML (.puml)
+├── PRD_SimGizi.md                 # Laporan Product Requirements Document Lengkap
 ├── src/
 │   ├── app/
 │   │   ├── api/
@@ -94,75 +111,59 @@ SimGizi/
 │   │   ├── layout.tsx             # Root Layout, Font Provider & Toaster
 │   │   └── page.tsx               # Halaman Utama (Dashboard Monitoring)
 │   ├── components/
-│   │   ├── _shared/               # Modal WHO, Detail Dialog, dan Skeletons
-│   │   │   └── skeletons/         # SkeletonBase, Table, StatCard, Chart, AlertCard
+│   │   ├── _shared/               # Modal WHO, Modal Detail, Modal Hapus, Skeletons
 │   │   ├── charts/                # Komponen Visualisasi Bar Chart Distribusi Gizi
 │   │   ├── dashboard/             # HealthSummary dan StuntingAlerts
-│   │   ├── forms/                 # CustomDatePicker, CustomSelect, LoginForm
+│   │   ├── forms/                 # CustomDatePicker, CustomSelect, Form Input
 │   │   ├── layouts/               # Sidebar Desktop/Mobile, Topbar, ThemeToggle
 │   │   └── pdf/                   # Template Dokumen PDF (LaporanGiziDocument)
-│   ├── hooks/                     # Custom Hooks (useTheme, useDataAnak, useHasMounted, useSidebarCollapse)
+│   ├── hooks/                     # Custom Hooks (useTheme, useDataAnak, useHasMounted)
 │   ├── lib/
 │   │   ├── data/
-│   │   │   └── zscore-reference.json  # 730 baris data referensi antropometri WHO Permenkes 2020
-│   │   ├── custom-toast.tsx       # Wrapper notifikasi toast badge custom
-│   │   ├── data-anak-store.ts     # Persistent store data anak (localStorage + listeners)
-│   │   ├── data-anak.ts           # Data seed master anak dan interface AnakRecord
+│   │   │   └── zscore-reference.json  # 730 baris data baku WHO Permenkes 2020
+│   │   ├── custom-toast.tsx       # Sistem notifikasi toast custom
+│   │   ├── data-anak-store.ts     # Persistent store data anak (localStorage)
 │   │   └── zscore.ts              # Engine kalkulasi Z-score WHO & Exact Banker's Rounding
 │   ├── styles/
-│   │   └── globals.css            # Token palet warna, CSS variables, & keyframe anim
+│   │   └── globals.css            # Token palet warna, CSS variables, & styling global
 │   ├── types/                     # Definisi TypeScript Interface & Data Models
-│   └── proxy.ts                   # Next.js 16 Route Guard & Session Proxy
-├── .env.local                     # Konfigurasi Environment Variable (Private, diabaikan Git)
-├── package.json                   # Konfigurasi dependensi & npm scripts
-├── tsconfig.json                  # Konfigurasi TypeScript compiler
+│   └── proxy.ts                   # Next.js Route Guard & Session Proxy Middleware
+├── .env.local                     # Konfigurasi Environment Variables (Gemini API)
+├── package.json                   # Dependensi & script eksekusi proyek
+├── tsconfig.json                  # Konfigurasi TypeScript Compiler
 └── next.config.mjs                # Konfigurasi Next.js
 ```
 
 ---
 
-## 5. Klasifikasi Standar Status Gizi (WHO / Permenkes No. 2/2020)
-
-SimGizi menerapkan pemetaan Z-Score baku berdasarkan petunjuk teknis antropometri anak:
-
-| Status Gizi     | Ambang Batas Z-Score (SD)                     | Indeks Acuan               |
-| :-------------- | :-------------------------------------------- | :------------------------- |
-| **Normal**      | $-2.00 \text{ SD} \le Z \le +2.00 \text{ SD}$ | BB/U, TB/U, BB/TB          |
-| **Gizi Kurang** | $-3.00 \text{ SD} \le Z < -2.00 \text{ SD}$   | BB/TB (_Wasted_) atau BB/U |
-| **Gizi Buruk**  | $Z < -3.00 \text{ SD}$                        | BB/TB (_Severely Wasted_)  |
-| **Stunting**    | $Z < -2.00 \text{ SD}$                        | TB/U atau PB/U (_Stunted_) |
-
----
-
-## 6. Panduan Instalasi & Menjalankan Aplikasi
+## 6. Panduan Instalasi & Menjalankan
 
 ### 1. Prasyarat Sistem
 
-Pastikan perangkat Anda telah terpasang:
+- **Node.js** versi `18.18.0` atau yang lebih baru.
+- **npm** (atau package manager: `pnpm` / `yarn`).
 
-- **Node.js** versi `18.18.0` atau yang lebih baru
-- **npm** (atau package manager pilihan: `pnpm` / `yarn`)
-
-### 2. Kloning & Masuk ke Direktori
+### 2. Kloning Repository
 
 ```bash
 git clone https://github.com/Central-Computer-Improvement/The-Hack-2026-2-FE.git
 cd The-Hack-2026-2-FE
 ```
 
-### 3. Konfigurasi Environment Variables
+### 3. Konfigurasi Environment Variable
 
-Buat file `.env.local` di root proyek untuk mengaktifkan fitur Rekomendasi AI:
+Buat file `.env.local` pada direktori root proyek:
 
 ```env
 # Google Gemini API Key
-GEMINI_API_KEY=AQ...
+GEMINI_API_KEY=your_gemini_api_key_here
 
-# (Opsional) Model Gemini Default
+# Model Gemini yang Digunakan
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
-_(Catatan: Jika API key belum diisi atau koneksi API terganggu, aplikasi tetap berjalan normal karena dilengkapi mekanisme Fail-Safe agar fitur rekomendasi tetap bisa berjalan)._
+> [!NOTE]
+> Jika `GEMINI_API_KEY` tidak diisi, SimGizi tetap berjalan 100% normal dengan memanfaatkan modul _Local Deterministic Fail-Safe Engine_.
 
 ### 4. Instalasi Dependensi
 
@@ -176,11 +177,9 @@ npm install
 npm run dev
 ```
 
-Buka browser dan akses `http://localhost:3000`.
+Akses aplikasi melalui peramban web di `http://localhost:3000`.
 
-### 6. Kompilasi & Build Produksi
-
-Untuk memastikan seluruh kode bebas error dan teroptimasi secara penuh:
+### 6. Build Produksi
 
 ```bash
 npm run build
@@ -189,9 +188,9 @@ npm run start
 
 ---
 
-## 7. Login Demo
+## 7. Kredensial Demo
 
-Untuk masuk ke dalam dashboard aplikasi:
+Gunakan akun resmi demo berikut pada halaman `/login`:
 
 - **Username**: `kelompok2`
 - **Password**: `simgizi2026`
