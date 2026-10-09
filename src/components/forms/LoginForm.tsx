@@ -5,24 +5,25 @@ import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+type RoleOption = "posyandu" | "puskesmas" | "orang_tua";
+
 export const LoginForm: React.FC = () => {
   const router = useRouter();
+  const [selectedRole, setSelectedRole] = useState<RoleOption>("posyandu");
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const validUsernames = ["kelompok2"];
-    const validPasswords = ["simgizi2026"];
 
     const cleanUsername = username.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // 1. Kategori 1: Validasi Kelengkapan Field (UX)
+    // 1. Validasi Kelengkapan Field (UX)
     let hasEmpty = false;
 
     if (!cleanUsername) {
@@ -33,7 +34,7 @@ export const LoginForm: React.FC = () => {
     }
 
     if (!cleanPassword) {
-      setPasswordError("Password wajib diisi");
+      setPasswordError("Kata sandi wajib diisi");
       hasEmpty = true;
     } else {
       setPasswordError(null);
@@ -43,23 +44,39 @@ export const LoginForm: React.FC = () => {
       return;
     }
 
-    // 2. Kategori 2: Validasi Kredensial Keamanan (Anti-User Enumeration)
-    const isValidUser = validUsernames.includes(cleanUsername);
-    const isValidPass = validPasswords.includes(cleanPassword);
+    setIsLoading(true);
+    setPasswordError(null);
 
-    if (!isValidUser || !isValidPass) {
-      setPasswordError("Username/password salah");
-      return;
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: cleanUsername,
+          password: cleanPassword,
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        // Anti-User Enumeration
+        setPasswordError(json.error || "Username atau kata sandi salah");
+        setIsLoading(false);
+        return;
+      }
+
+      const redirectTo = json.data?.redirectTo || "/";
+      router.push(redirectTo);
+      router.refresh();
+    } catch {
+      setPasswordError("Gagal menghubungi server. Silakan coba kembali.");
+      setIsLoading(false);
     }
-
-    // 3. Kredensial Valid: Set session cookie & Redirect
-    document.cookie = "simgizi-auth=true; path=/; SameSite=Strict";
-    router.push("/");
-    router.refresh();
   };
 
   return (
-    <div className="w-full max-w-[649px] min-h-[500px] md:h-[546px] bg-white dark:bg-[#161920] border border-[#e6e8eb] dark:border-[#262a34] rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)] p-6 sm:p-8 md:p-12 flex flex-col justify-between transition-colors duration-200 select-none">
+    <div className="w-full max-w-[649px] min-h-[500px] md:h-auto bg-white dark:bg-[#161920] border border-[#e6e8eb] dark:border-[#262a34] rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)] p-6 sm:p-8 md:p-12 flex flex-col justify-between transition-colors duration-200 select-none">
       <form
         onSubmit={handleSubmit}
         className="flex flex-col justify-between h-full space-y-6 md:space-y-0"
@@ -85,13 +102,62 @@ export const LoginForm: React.FC = () => {
           </div>
 
           {/* Heading Section */}
-          <div className="mb-6 md:mb-8">
-            <h1 className="font-ag text-[32px] leading-[40px] font-medium tracking-tight text-zinc-900 dark:text-zinc-100">
-              Login
+          <div className="mb-5 md:mb-6">
+            <h1 className="font-ag text-[30px] sm:text-[32px] leading-[40px] font-medium tracking-tight text-zinc-900 dark:text-zinc-100">
+              Masuk ke SimGizi
             </h1>
-            <p className="font-inter text-[16px] text-zinc-500 dark:text-zinc-400 mt-1">
-              Masuk ke akun anda
+            <p className="font-inter text-[14px] sm:text-[15px] text-zinc-500 dark:text-zinc-400 mt-1">
+              Portal Layanan Terpadu Pemantauan Gizi Anak & Kesehatan Balita
             </p>
+          </div>
+
+          {/* Minimalist Segmented Role Tab (Clean Enterprise Style) */}
+          <div className="flex p-1 bg-[#f1f3f5] dark:bg-[#1e222d] rounded-xl mb-6 border border-gray-200/60 dark:border-zinc-800">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRole("posyandu");
+                if (usernameError) setUsernameError(null);
+                if (passwordError) setPasswordError(null);
+              }}
+              className={`flex-1 py-2 text-[13px] font-medium rounded-lg transition-all cursor-pointer ${
+                selectedRole === "posyandu"
+                  ? "bg-white dark:bg-[#161920] text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold"
+                  : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
+              }`}
+            >
+              Posyandu
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRole("puskesmas");
+                if (usernameError) setUsernameError(null);
+                if (passwordError) setPasswordError(null);
+              }}
+              className={`flex-1 py-2 text-[13px] font-medium rounded-lg transition-all cursor-pointer ${
+                selectedRole === "puskesmas"
+                  ? "bg-white dark:bg-[#161920] text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold"
+                  : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
+              }`}
+            >
+              Puskesmas
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRole("orang_tua");
+                if (usernameError) setUsernameError(null);
+                if (passwordError) setPasswordError(null);
+              }}
+              className={`flex-1 py-2 text-[13px] font-medium rounded-lg transition-all cursor-pointer ${
+                selectedRole === "orang_tua"
+                  ? "bg-white dark:bg-[#161920] text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold"
+                  : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
+              }`}
+            >
+              Orang Tua
+            </button>
           </div>
 
           {/* Form Input Fields */}
@@ -100,9 +166,15 @@ export const LoginForm: React.FC = () => {
             <div>
               <label
                 htmlFor="username"
-                className="block font-inter text-[16px] font-medium text-zinc-800 dark:text-zinc-200 mb-1.5 md:mb-2"
+                className="block font-inter text-[15px] font-medium text-zinc-800 dark:text-zinc-200 mb-1.5 md:mb-2"
               >
-                Username
+                {selectedRole === "posyandu"
+                  ? "Username Posyandu"
+                  : selectedRole === "puskesmas"
+                  ? "Username Puskesmas"
+                  : selectedRole === "orang_tua"
+                  ? "Username Akun Orang Tua"
+                  : "Username"}
               </label>
               <input
                 id="username"
@@ -111,12 +183,18 @@ export const LoginForm: React.FC = () => {
                 onChange={(e) => {
                   setUsername(e.target.value);
                   if (usernameError) setUsernameError(null);
-                  if (passwordError === "Username/password salah") {
-                    setPasswordError(null);
-                  }
+                  if (passwordError) setPasswordError(null);
                 }}
-                placeholder="Masukan username anda"
-                className={`w-full px-4 py-3 rounded-xl font-inter text-[16px] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none transition-all duration-150 ${
+                placeholder={
+                  selectedRole === "posyandu"
+                    ? "Masukkan ID / username Posyandu"
+                    : selectedRole === "puskesmas"
+                    ? "Masukkan ID / username Puskesmas"
+                    : selectedRole === "orang_tua"
+                    ? "Masukkan ID / username Orang Tua"
+                    : "Masukkan username Anda"
+                }
+                className={`w-full px-4 py-3 rounded-xl font-inter text-[15px] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none transition-all duration-150 ${
                   usernameError
                     ? "bg-white dark:bg-[#1e222d] border border-[#a52a2a] dark:border-red-500 focus:border-[#a52a2a] dark:focus:border-red-500"
                     : "bg-[#f5f6f8] dark:bg-[#1e222d] border border-transparent focus:border-[#0d472c] dark:focus:border-[#2d6a4f] focus:bg-white dark:focus:bg-[#1e222d]"
@@ -133,9 +211,9 @@ export const LoginForm: React.FC = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block font-inter text-[16px] font-medium text-zinc-800 dark:text-zinc-200 mb-1.5 md:mb-2"
+                className="block font-inter text-[15px] font-medium text-zinc-800 dark:text-zinc-200 mb-1.5 md:mb-2"
               >
-                Password
+                Kata Sandi
               </label>
               <div className="relative flex items-center">
                 <input
@@ -146,8 +224,8 @@ export const LoginForm: React.FC = () => {
                     setPassword(e.target.value);
                     if (passwordError) setPasswordError(null);
                   }}
-                  placeholder="Masukan password anda"
-                  className={`w-full px-4 py-3 pr-12 rounded-xl font-inter text-[16px] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none transition-all duration-150 ${
+                  placeholder="Masukkan kata sandi Anda"
+                  className={`w-full px-4 py-3 pr-12 rounded-xl font-inter text-[15px] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none transition-all duration-150 ${
                     passwordError
                       ? "bg-white dark:bg-[#1e222d] border border-[#a52a2a] dark:border-red-500 focus:border-[#a52a2a] dark:focus:border-red-500"
                       : "bg-[#f5f6f8] dark:bg-[#1e222d] border border-transparent focus:border-[#0d472c] dark:focus:border-[#2d6a4f] focus:bg-white dark:focus:bg-[#1e222d]"
@@ -157,7 +235,7 @@ export const LoginForm: React.FC = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors focus:outline-none cursor-pointer"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
                 >
                   {showPassword ? (
                     <Eye className="w-5 h-5 stroke-[1.8]" />
@@ -176,23 +254,17 @@ export const LoginForm: React.FC = () => {
         </div>
 
         {/* Action Button & Disclaimer */}
-        <div className="pt-2 md:pt-4">
+        <div className="pt-6 md:pt-8">
           <button
             type="submit"
-            className="w-full py-3.5 bg-[#0d472c] hover:bg-[#0a3923] active:bg-[#072a1a] text-white font-inter text-[15px] font-medium rounded-xl transition-colors shadow-xs flex items-center justify-center cursor-pointer"
+            disabled={isLoading}
+            className="w-full py-3.5 bg-[#0d472c] hover:bg-[#0a3923] active:bg-[#072a1a] disabled:opacity-75 disabled:cursor-not-allowed text-white font-inter text-[15px] font-medium rounded-xl transition-colors shadow-xs flex items-center justify-center cursor-pointer"
           >
-            Login
+            {isLoading ? "Memverifikasi..." : "Masuk ke Sistem"}
           </button>
 
-          <p className="font-inter text-[12.5px] text-zinc-500 dark:text-zinc-400 text-center mt-3.5 md:mt-4 leading-normal">
-            By continuing, you agree to our{" "}
-            <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-              Terms
-            </span>{" "}
-            and{" "}
-            <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-              Privacy Policy
-            </span>
+          <p className="font-inter text-[12px] text-zinc-500 dark:text-zinc-400 text-center mt-3.5 md:mt-4 leading-normal">
+            Sistem Informasi Kesehatan Anak dan Pemantauan Gizi Terpadu
           </p>
         </div>
       </form>

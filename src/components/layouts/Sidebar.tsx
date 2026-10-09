@@ -4,19 +4,18 @@ import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  LayoutDashboard,
-  UserPlus,
-  FileText,
-  Clock,
   LogOut,
   ChevronsLeft,
   ChevronsRight,
   X,
 } from "lucide-react";
 import useSidebarCollapse from "@/hooks/useSidebarCollapse";
+import { RolePengguna } from "@/types";
+import { ROLE_NAV_ITEMS } from "@/lib/constants/navigation";
 
 interface SidebarProps {
   currentTab?: string;
+  role?: RolePengguna;
   onSelectTab?: (tabId: string) => void;
   isMobileOpen?: boolean;
   onCloseMobile?: () => void;
@@ -24,6 +23,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
+  role,
   onSelectTab,
   isMobileOpen = false,
   onCloseMobile,
@@ -32,32 +32,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const router = useRouter();
   const { isCollapsed, toggleCollapse } = useSidebarCollapse();
 
-  const navItems = [
-    {
-      id: "dashboard",
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      href: "/",
-    },
-    {
-      id: "pencatatan-anak",
-      label: "Pencatatan Data Anak",
-      icon: UserPlus,
-      href: "/pencatatan-anak",
-    },
-    {
-      id: "rekap-data-gizi",
-      label: "Rekap Data Gizi",
-      icon: FileText,
-      href: "/rekap-data-gizi",
-    },
-    {
-      id: "riwayat-pemeriksaan",
-      label: "Riwayat Pemeriksaan",
-      icon: Clock,
-      href: "/riwayat-pemeriksaan",
-    },
-  ];
+  // Deteksi role aktif berdasarkan props atau pathname
+  const activeRole: RolePengguna =
+    role ||
+    (pathname.startsWith("/puskesmas")
+      ? "puskesmas"
+      : pathname.startsWith("/orang-tua")
+      ? "orang_tua"
+      : "posyandu");
+
+  const navItems = ROLE_NAV_ITEMS[activeRole] || ROLE_NAV_ITEMS.posyandu;
 
   const handleNavClick = (id: string, href: string) => {
     if (onSelectTab) {
@@ -68,12 +52,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (onCloseMobile) onCloseMobile();
   };
 
-  const handleLogout = () => {
-    // Clear the auth cookie
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Abaikan jika network offline
+    }
     document.cookie =
       "simgizi-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie =
+      "simgizi_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie =
+      "simgizi_role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     router.push("/login");
-    router.refresh(); // Ensure the proxy re-evaluates the cookie state
+    router.refresh();
   };
 
   const renderContent = (collapsed: boolean, isMobile = false) => (

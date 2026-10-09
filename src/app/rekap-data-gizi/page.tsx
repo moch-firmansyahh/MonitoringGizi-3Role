@@ -132,17 +132,20 @@ export default function RekapDataGiziPage() {
   const [pageInputLaptop, setPageInputLaptop] = useState(
     String(validPageLaptop),
   );
+  const [prevValidLaptop, setPrevValidLaptop] = useState(validPageLaptop);
+  if (prevValidLaptop !== validPageLaptop) {
+    setPrevValidLaptop(validPageLaptop);
+    setPageInputLaptop(String(validPageLaptop));
+  }
+
   const [pageInputMonitor, setPageInputMonitor] = useState(
     String(validPageMonitor),
   );
-
-  useEffect(() => {
-    setPageInputLaptop(String(validPageLaptop));
-  }, [validPageLaptop]);
-
-  useEffect(() => {
+  const [prevValidMonitor, setPrevValidMonitor] = useState(validPageMonitor);
+  if (prevValidMonitor !== validPageMonitor) {
+    setPrevValidMonitor(validPageMonitor);
     setPageInputMonitor(String(validPageMonitor));
-  }, [validPageMonitor]);
+  }
 
   /* delete */
   const handleDelete = () => {

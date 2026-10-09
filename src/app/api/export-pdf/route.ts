@@ -4,7 +4,10 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import LaporanGiziDocument, {
   ReportItem,
 } from "@/components/pdf/LaporanGiziDocument";
-import { dataAnak, AnakRecord } from "@/lib/data-anak";
+import { AnakRecord } from "@/types";
+import { getCurrentUser } from "@/lib/auth/session";
+import { anakRepository } from "@/lib/repositories/anak.repository";
+import { pengukuranRepository } from "@/lib/repositories/pengukuran.repository";
 
 const parseZScoreSafe = (val: unknown): number => {
   if (typeof val === "number") return isNaN(val) ? 0 : val;
@@ -19,8 +22,9 @@ const parseZScoreSafe = (val: unknown): number => {
 async function generatePdfFromRecords(
   records: AnakRecord[],
   searchFilter: string,
+  namaPosyandu = "POSYANDU MELATI 03",
+  namaPuskesmas = "PUSKESMAS BOJONGSOANG",
 ) {
-  // 1. Filter jika ada status gizi spesifik yang diminta
   let filteredData = [...records];
   if (searchFilter && searchFilter !== "Semua Kategori") {
     filteredData = filteredData.filter(
@@ -28,7 +32,7 @@ async function generatePdfFromRecords(
     );
   }
 
-  // 2. Urutkan data berdasarkan prioritas status gizi (paling bahaya ke paling aman)
+  // Urutkan data berdasarkan prioritas status gizi (stunting, gizi buruk, gizi kurang, normal)
   const statusPriority: Record<string, number> = {
     stunting: 1,
     "gizi buruk": 2,
@@ -42,7 +46,6 @@ async function generatePdfFromRecords(
     return pA - pB;
   });
 
-  // 3. Format data ke ReportItem dengan normalisasi aman
   const reportItems: ReportItem[] = [];
   let counter = 1;
 
@@ -68,7 +71,6 @@ async function generatePdfFromRecords(
     });
   }
 
-  // 4. Generate Tanggal Cetak & PDF Buffer
   const now = new Date();
   const months = [
     "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -78,11 +80,11 @@ async function generatePdfFromRecords(
   const realTimePeriode = `${months[now.getMonth()]} ${now.getFullYear()}`;
 
   const pdfElement = React.createElement(LaporanGiziDocument, {
-    namaPosyandu: "POSYANDU MEKAR SARI 01",
-    namaDinas: "DINAS KESEHATAN KOTA BANDUNG",
-    namaKecamatan: "KECAMATAN BOJONGSOANG - KOTA BANDUNG",
+    namaPosyandu: namaPosyandu.toUpperCase(),
+    namaDinas: "DINAS KESEHATAN KABUPATEN BANDUNG",
+    namaKecamatan: `${namaPuskesmas.toUpperCase()} - KEC. BOJONGSOANG`,
     alamat:
-      "Jl. Sukabirus No. 123, Bojongsoang, Kota Bandung | Telp: (022) 2501234",
+      "Jl. Sukabirus No. 123, Bojongsoang, Kab. Bandung | Telp: (022) 2501234",
     periode: realTimePeriode,
     tanggalCetak: realTimeTanggalCetak,
     namaKepala: "Dr. Hj. Syahla Mutiara Latifah, M.Kes",
@@ -91,7 +93,7 @@ async function generatePdfFromRecords(
   });
 
   const pdfBuffer = await renderToBuffer(pdfElement as any);
-  const filename = `rekap-gizi-mekar-sari-${months[now.getMonth()].toLowerCase()}-${now.getFullYear()}.pdf`;
+  const filename = `rekap-gizi-${namaPosyandu.toLowerCase().replace(/\s+/g, "-")}-${months[now.getMonth()].toLowerCase()}-${now.getFullYear()}.pdf`;
 
   return new NextResponse(new Uint8Array(pdfBuffer), {
     status: 200,
@@ -103,9 +105,24 @@ async function generatePdfFromRecords(
   });
 }
 
-// Handler POST: Menerima data dinamis dari localStorage client
+// Handler POST: Menerima data dinamis dari client
 export async function POST(request: NextRequest) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Autentikasi diperlukan untuk mengunduh laporan PDF." },
+        { status: 401 },
+      );
+    }
+
+    if (user.role === "orang_tua") {
+      return NextResponse.json(
+        { error: "Role Orang Tua tidak memiliki izin mengunduh laporan resmi." },
+        { status: 403 },
+      );
+    }
+
     let body: any;
     try {
       body = await request.json();
@@ -126,7 +143,12 @@ export async function POST(request: NextRequest) {
     const records: AnakRecord[] = body.data;
     const filter = typeof body.filter === "string" ? body.filter : "";
 
-    return await generatePdfFromRecords(records, filter);
+    return await generatePdfFromRecords(
+      records,
+      filter,
+      user.namaPosyandu || "Posyandu Melati 03",
+      user.namaPuskesmas || "Puskesmas Bojongsoang",
+    );
   } catch (error) {
     console.error("Gagal membuat PDF via POST:", error);
     return NextResponse.json(
@@ -136,12 +158,52 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Handler GET: Fallback opsional
+// Handler GET: Membaca data langsung dari database repositori
 export async function GET(request: NextRequest) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Autentikasi diperlukan untuk mengunduh laporan PDF." },
+        { status: 401 },
+      );
+    }
+
+    if (user.role === "orang_tua") {
+      return NextResponse.json(
+        { error: "Role Orang Tua tidak memiliki izin mengunduh laporan resmi." },
+        { status: 403 },
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const searchFilter = searchParams.get("filter") || "";
-    return await generatePdfFromRecords(dataAnak, searchFilter);
+    const posyanduId =
+      user.role === "posyandu"
+        ? user.idPosyandu || undefined
+        : searchParams.get("posyanduId") || undefined;
+
+    const allAnak = await anakRepository.getAll({ posyanduId });
+    const allPengukuran = await pengukuranRepository.getAll();
+
+    const latestMap = new Map();
+    for (const p of allPengukuran) {
+      if (!latestMap.has(p.idAnak)) {
+        latestMap.set(p.idAnak, p);
+      }
+    }
+
+    const records: AnakRecord[] = allAnak.map((anak) => {
+      const p = latestMap.get(anak.id);
+      return anakRepository.toAnakRecord(anak, p);
+    });
+
+    return await generatePdfFromRecords(
+      records,
+      searchFilter,
+      user.namaPosyandu || "Posyandu Melati 03",
+      user.namaPuskesmas || "Puskesmas Bojongsoang",
+    );
   } catch (error) {
     console.error("Gagal membuat PDF via GET:", error);
     return NextResponse.json(

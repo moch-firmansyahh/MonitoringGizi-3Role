@@ -11,6 +11,7 @@ import { addDataAnak } from "@/lib/data-anak-store";
 import { AnakRecord } from "@/lib/data-anak";
 import { showToast } from "@/lib/custom-toast";
 import { loadReference, nilaiGiziAnak } from "@/lib/zscore";
+import { offlineQueue } from "@/lib/offline/queue";
 
 export default function PencatatanAnakPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -218,6 +219,26 @@ export default function PencatatanAnakPage() {
 
       // Save to persistent localStorage store
       addDataAnak(newChildRecord);
+
+      // Async sync ke database server dengan fallback antrean offline lokal
+      const clientUuid = crypto.randomUUID();
+      const offlinePayload = {
+        clientUuid,
+        idAnak: newChildRecord.id,
+        tanggalPeriksa: today,
+        usiaBulan: usia,
+        beratKg: bb,
+        tinggiCm: tb,
+        rekomendasi: aiAdvice,
+      };
+
+      fetch("/api/pengukuran", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(offlinePayload),
+      }).catch(() => {
+        offlineQueue.add(offlinePayload);
+      });
 
       // Custom Sleek Toast
       showToast.success("Data Balita berhasil ditambahkan");
