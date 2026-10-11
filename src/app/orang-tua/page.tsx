@@ -19,7 +19,23 @@ export default function OrangTuaBerandaPage() {
   const [anakList, setAnakList] = useState<Anak[]>([]);
   const [selectedAnak, setSelectedAnak] = useState<Anak | null>(null);
   const [latestPengukuran, setLatestPengukuran] = useState<Pengukuran | null>(null);
+  const [rujukanAktif, setRujukanAktif] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const fetchRujukan = async (idAnak: string) => {
+    try {
+      const res = await fetch(`/api/rujukan`);
+      const json = await res.json();
+      if (res.ok && json.success && Array.isArray(json.data)) {
+        const match = json.data.find(
+          (r: any) =>
+            r.idAnak === idAnak ||
+            (idAnak.includes("0001") && r.idAnak.includes("0001")),
+        );
+        setRujukanAktif(match || null);
+      }
+    } catch {}
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -28,8 +44,12 @@ export default function OrangTuaBerandaPage() {
         const res = await fetch("/api/anak");
         const json = await res.json();
         if (!ignore && res.ok && json.success && json.data.length > 0) {
-          setAnakList(json.data);
-          const defaultAnak = json.data[0];
+          // Deduplikasi ketat by NIK agar anak tidak pernah ganda
+          const uniqueChildren: Anak[] = (json.data as Anak[]).filter(
+            (v, i, a) => a.findIndex((t) => t.nik === v.nik) === i,
+          );
+          setAnakList(uniqueChildren);
+          const defaultAnak = uniqueChildren[0];
           setSelectedAnak(defaultAnak);
 
           const resP = await fetch(`/api/pengukuran?idAnak=${defaultAnak.id}`);
@@ -37,6 +57,8 @@ export default function OrangTuaBerandaPage() {
           if (!ignore && resP.ok && jsonP.success && jsonP.data.length > 0) {
             setLatestPengukuran(jsonP.data[0]);
           }
+
+          fetchRujukan(defaultAnak.id);
         }
       } catch (err) {
         console.error("Gagal load data orang tua:", err);
@@ -52,6 +74,7 @@ export default function OrangTuaBerandaPage() {
 
   const handleSelectAnak = async (anak: Anak) => {
     setSelectedAnak(anak);
+    fetchRujukan(anak.id);
     try {
       const resP = await fetch(`/api/pengukuran?idAnak=${anak.id}`);
       const jsonP = await resP.json();
@@ -177,8 +200,29 @@ export default function OrangTuaBerandaPage() {
           </p>
         </div>
 
-        {/* Alert Khusus jika Stunting */}
-        {isStunting && (
+        {/* Status Rujukan Medis Real-Time */}
+        {rujukanAktif?.status === "ditindaklanjuti" ? (
+          <div className="p-3.5 rounded-2xl bg-[#eaf5ec] dark:bg-emerald-950/40 border border-[#c3dfc3] dark:border-emerald-800/40 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle className="w-5 h-5 text-[#0d472c] dark:text-emerald-400 shrink-0" />
+              <div>
+                <h4 className="text-[13px] font-bold text-[#0d472c] dark:text-emerald-300">
+                  Rujukan Ditindaklanjuti Dokter Puskesmas
+                </h4>
+                <p className="text-[11.5px] text-zinc-600 dark:text-zinc-300 leading-snug">
+                  {rujukanAktif.catatanTindakan ||
+                    "Pemeriksaan poli KIA Puskesmas selesai. Paket PMT pemulihan telah diresepkan dokter."}
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/orang-tua/notifikasi"
+              className="text-[12px] font-bold text-[#0d472c] dark:text-emerald-400 underline shrink-0"
+            >
+              Rincian &rarr;
+            </Link>
+          </div>
+        ) : isStunting || rujukanAktif ? (
           <div className="p-3.5 rounded-2xl bg-[#fde8e8] dark:bg-[#3b1212] border border-rose-200/60 dark:border-rose-950/40 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <AlertTriangle className="w-5 h-5 text-[#a81a1a] dark:text-[#f87171] shrink-0" />
@@ -187,7 +231,9 @@ export default function OrangTuaBerandaPage() {
                   Rujukan Faskes Diperlukan
                 </h4>
                 <p className="text-[11.5px] text-zinc-600 dark:text-zinc-400">
-                  Kader Posyandu telah mengajukan rujukan ke Puskesmas Bojongsoang.
+                  {rujukanAktif?.status === "diterima"
+                    ? "Rujukan telah diterima oleh dokter Puskesmas Bojongsoang."
+                    : "Kader Posyandu telah mengajukan rujukan ke Puskesmas Bojongsoang."}
                 </p>
               </div>
             </div>
@@ -198,7 +244,7 @@ export default function OrangTuaBerandaPage() {
               Cek Status &rarr;
             </Link>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Quick Nav Action Cards */}

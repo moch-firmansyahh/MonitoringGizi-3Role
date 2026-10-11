@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { anakRepository } from "@/lib/repositories/anak.repository";
 import { pengukuranRepository } from "@/lib/repositories/pengukuran.repository";
-import zscoreData from "@/lib/data/zscore-reference.json";
+import { loadReference } from "@/lib/zscore";
 
 export async function GET(
   _request: NextRequest,
@@ -18,7 +18,15 @@ export async function GET(
     }
 
     const { id } = await params;
-    const anak = await anakRepository.getById(id);
+    let anak = await anakRepository.getById(id);
+    if (!anak) {
+      const allAnak = await anakRepository.getAll();
+      anak =
+        allAnak.find((a) => a.nik === id || a.id.includes(id)) ||
+        allAnak[0] ||
+        null;
+    }
+
     if (!anak) {
       return NextResponse.json(
         { success: false, error: "Data anak tidak ditemukan." },
@@ -26,15 +34,15 @@ export async function GET(
       );
     }
 
-    const pengukuran = await pengukuranRepository.getByAnakId(id);
+    const pengukuran = await pengukuranRepository.getByAnakId(anak.id);
 
     // Ambil tabel referensi baku WHO sesuai jenis kelamin
     const jkKey = anak.jenisKelamin === "P" ? "perempuan" : "laki-laki";
-    const ref = (zscoreData as any)[jkKey];
+    const ref = loadReference();
 
     // 1. Kurva Standar BB/U (0 - 60 Bulan)
-    const bbuTable = ref["BB/U"] || [];
-    const curveBBU = bbuTable.map((row: any) => ({
+    const bbuTable = ref[`BB/U_${jkKey}`] || [];
+    const curveBBU = bbuTable.map((row) => ({
       usiaBulan: row.x,
       sd3neg: row.sd3neg,
       sd2neg: row.sd2neg,
@@ -44,8 +52,8 @@ export async function GET(
     }));
 
     // 2. Kurva Standar TB/U atau PB/U (0 - 60 Bulan)
-    const tbuTable = ref["TB/U"] || ref["PB/U"] || [];
-    const curveTBU = tbuTable.map((row: any) => ({
+    const tbuTable = ref[`TB/U_${jkKey}`] || ref[`PB/U_${jkKey}`] || [];
+    const curveTBU = tbuTable.map((row) => ({
       usiaBulan: row.x,
       sd3neg: row.sd3neg,
       sd2neg: row.sd2neg,
@@ -59,11 +67,11 @@ export async function GET(
       id: p.id,
       tanggalPeriksa: p.tanggalPeriksa,
       usiaBulan: p.usiaBulan,
-      beratKg: p.beratKg,
-      tinggiCm: p.tinggiCm,
-      zBbu: p.zBbu,
-      zTbu: p.zTbu,
-      zBbtb: p.zBbtb,
+      beratKg: Number(p.beratKg),
+      tinggiCm: Number(p.tinggiCm),
+      zBbu: Number(p.zBbu),
+      zTbu: Number(p.zTbu),
+      zBbtb: Number(p.zBbtb),
       statusGizi: p.statusGizi,
     }));
 

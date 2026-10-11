@@ -37,8 +37,40 @@ export const Topbar: React.FC<TopbarProps> = ({
   const pathname = usePathname();
   const isOnline = useSyncExternalStore(subscribeOnline, getOnlineSnapshot, getServerOnlineSnapshot);
   const [pendingCount, setPendingCount] = useState(0);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [hasUnread, setHasUnread] = useState(true);
+  const [notifList, setNotifList] = useState<any[]>([]);
+
+  useEffect(() => {
+    let ignore = false;
+    async function load() {
+      try {
+        const res = await fetch("/api/notifikasi");
+        const json = await res.json();
+        if (!ignore && res.ok && json.success) {
+          setNotifList(json.data || []);
+          setHasUnread(Boolean(json.unreadCount && json.unreadCount > 0));
+        }
+      } catch {}
+    }
+    load();
+    const timer = setInterval(load, 4000);
+    return () => {
+      ignore = true;
+      clearInterval(timer);
+    };
+  }, []);
+
+  const handleOpenNotifications = () => {
+    const nextState = !showNotifications;
+    setShowNotifications(nextState);
+    if (nextState) {
+      setHasUnread(false);
+      fetch("/api/notifikasi", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ all: true }),
+      }).catch(() => {});
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -113,10 +145,7 @@ export const Topbar: React.FC<TopbarProps> = ({
         <div className="relative">
           <button
             type="button"
-            onClick={() => {
-              setShowNotifications(!showNotifications);
-              setHasUnread(false);
-            }}
+            onClick={handleOpenNotifications}
             className="p-2 rounded-xl text-zinc-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer relative"
             aria-label="Pemberitahuan Sistem"
           >
@@ -151,38 +180,52 @@ export const Topbar: React.FC<TopbarProps> = ({
                 </div>
 
                 <div className="divide-y divide-gray-100 dark:divide-zinc-800 max-h-[300px] overflow-y-auto">
-                  <div className="py-2.5 space-y-1">
-                    <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 text-[11.5px] font-semibold">
-                      <AlertTriangle className="w-3.5 h-3.5" />
-                      <span>Rujukan Medis Faskes</span>
+                  {notifList.length === 0 ? (
+                    <div className="py-6 text-center text-[12.5px] text-zinc-400">
+                      Belum ada notifikasi baru.
                     </div>
-                    <p className="text-[12.5px] text-zinc-700 dark:text-zinc-300 leading-snug">
-                      Posyandu Melati 03 telah mengajukan rujukan ke Puskesmas Bojongsoang untuk ananda Muhammad Arfan.
-                    </p>
-                    <span className="text-[11px] text-zinc-400 block pt-0.5">12 Agustus 2026</span>
-                  </div>
+                  ) : (
+                    notifList.map((n) => {
+                      const isRujukan =
+                        n.jenis === "rujukan_status" || n.jenis === "rujukan_baru";
+                      const isJadwal = n.jenis === "jadwal_pengingat";
 
-                  <div className="py-2.5 space-y-1">
-                    <div className="flex items-center gap-1.5 text-[#0d472c] dark:text-emerald-400 text-[11.5px] font-semibold">
-                      <Activity className="w-3.5 h-3.5" />
-                      <span>Hasil Pengukuran Antropometri</span>
-                    </div>
-                    <p className="text-[12.5px] text-zinc-700 dark:text-zinc-300 leading-snug">
-                      Tinggi badan Muhammad Arfan tercatat 78.5 cm pada usia 28 bulan (TB/U -3.10 SD).
-                    </p>
-                    <span className="text-[11px] text-zinc-400 block pt-0.5">12 Agustus 2026</span>
-                  </div>
-
-                  <div className="py-2.5 space-y-1">
-                    <div className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400 text-[11.5px] font-semibold">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>Jadwal Penimbangan Rutin</span>
-                    </div>
-                    <p className="text-[12.5px] text-zinc-700 dark:text-zinc-300 leading-snug">
-                      Penimbangan serentak balita berikutnya di Posyandu Melati 03 pada 12 September 2026.
-                    </p>
-                    <span className="text-[11px] text-zinc-400 block pt-0.5">Kemarin</span>
-                  </div>
+                      return (
+                        <div key={n.id} className="py-2.5 space-y-1">
+                          <div
+                            className={`flex items-center gap-1.5 text-[11.5px] font-semibold ${
+                              isRujukan
+                                ? "text-rose-600 dark:text-rose-400"
+                                : isJadwal
+                                ? "text-zinc-600 dark:text-zinc-400"
+                                : "text-[#0d472c] dark:text-emerald-400"
+                            }`}
+                          >
+                            {isRujukan ? (
+                              <AlertTriangle className="w-3.5 h-3.5" />
+                            ) : isJadwal ? (
+                              <Calendar className="w-3.5 h-3.5" />
+                            ) : (
+                              <Activity className="w-3.5 h-3.5" />
+                            )}
+                            <span>{n.judul}</span>
+                          </div>
+                          <p className="text-[12.5px] text-zinc-700 dark:text-zinc-300 leading-snug">
+                            {n.isi}
+                          </p>
+                          <span className="text-[11px] text-zinc-400 block pt-0.5">
+                            {n.createdAt
+                              ? new Date(n.createdAt).toLocaleDateString("id-ID", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                })
+                              : "Hari ini"}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             </>

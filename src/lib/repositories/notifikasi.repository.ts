@@ -1,7 +1,9 @@
 import { Notifikasi, JenisNotifikasi } from "@/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-let localNotifikasiStore: Notifikasi[] = [
+
+
+const INITIAL_NOTIFIKASI_SEED: Notifikasi[] = [
   {
     id: "n1",
     idPenerima: "c0000000-0000-0000-0000-000000000003", // Orang Tua Arfan
@@ -34,6 +36,25 @@ let localNotifikasiStore: Notifikasi[] = [
   },
 ];
 
+const globalForNotif = globalThis as unknown as {
+  __localNotifikasiStore?: Notifikasi[];
+  __localNotifikasiStoreVersion?: number;
+};
+
+const CURRENT_NOTIF_VERSION = 3;
+
+const getNotifStore = (): Notifikasi[] => {
+  if (
+    !globalForNotif.__localNotifikasiStore ||
+    globalForNotif.__localNotifikasiStore.length === 0 ||
+    globalForNotif.__localNotifikasiStoreVersion !== CURRENT_NOTIF_VERSION
+  ) {
+    globalForNotif.__localNotifikasiStore = [...INITIAL_NOTIFIKASI_SEED];
+    globalForNotif.__localNotifikasiStoreVersion = CURRENT_NOTIF_VERSION;
+  }
+  return globalForNotif.__localNotifikasiStore;
+};
+
 export const notifikasiRepository = {
   async getByUserId(userId: string): Promise<Notifikasi[]> {
     const supabase = await createServerSupabaseClient();
@@ -44,7 +65,7 @@ export const notifikasiRepository = {
           .select("*")
           .eq("id_penerima", userId)
           .order("created_at", { ascending: false });
-        if (!error && data) {
+        if (!error && data && data.length > 0) {
           return data.map((item) => ({
             id: item.id,
             idPenerima: item.id_penerima,
@@ -61,13 +82,13 @@ export const notifikasiRepository = {
       }
     }
 
-    return localNotifikasiStore
+    return getNotifStore()
       .filter((n) => n.idPenerima === userId)
       .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1));
   },
 
   async markAsRead(id: string): Promise<boolean> {
-    const item = localNotifikasiStore.find((n) => n.id === id);
+    const item = getNotifStore().find((n) => n.id === id);
     if (item) item.dibaca = true;
 
     const supabase = await createServerSupabaseClient();
@@ -77,6 +98,13 @@ export const notifikasiRepository = {
       } catch (err) {
         console.warn("Gagal update notifikasi di Supabase:", err);
       }
+    }
+    return true;
+  },
+
+  async markAllAsRead(userId: string): Promise<boolean> {
+    for (const n of getNotifStore()) {
+      if (n.idPenerima === userId) n.dibaca = true;
     }
     return true;
   },
@@ -99,7 +127,7 @@ export const notifikasiRepository = {
       createdAt: new Date().toISOString(),
     };
 
-    localNotifikasiStore.unshift(newNotif);
+    getNotifStore().unshift(newNotif);
     return newNotif;
   },
 };

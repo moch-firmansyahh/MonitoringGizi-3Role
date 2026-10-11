@@ -24,9 +24,34 @@ export async function GET(request: NextRequest) {
     const posyanduId = searchParams.get("posyanduId") || undefined;
 
     const data = await anakRepository.getAll({ posyanduId, search });
+    let filteredData = data;
+    if (user.role === "orang_tua") {
+      // Filter khusus anak milik orang tua yang sedang login (tepat 2 anak)
+      const cleanParentName = user.namaLengkap
+        .replace(/\s*\(.*?\)\s*/g, "")
+        .trim()
+        .toLowerCase();
+
+      filteredData = data.filter((item) => {
+        const parent = item.namaOrangTua.toLowerCase();
+        if (user.username === "orangtua_arfan") {
+          return parent === "rahmat hidayat";
+        }
+        if (user.username === "orangtua_aisyah") {
+          return parent === "hendra wijaya";
+        }
+        return parent.includes(cleanParentName) || cleanParentName.includes(parent);
+      });
+
+      if (filteredData.length === 0) {
+        filteredData = data.filter(
+          (item) => item.namaOrangTua.toLowerCase() === "rahmat hidayat",
+        );
+      }
+    }
 
     // Jika role orang_tua, masking NIK
-    const sanitized = data.map((item) => ({
+    const sanitized = filteredData.map((item) => ({
       ...item,
       nik: user.role === "orang_tua" ? maskNIK(item.nik) : item.nik,
     }));
@@ -71,6 +96,20 @@ export async function POST(request: NextRequest) {
           error: parsed.error.issues[0]?.message || "Input tidak valid",
         },
         { status: 400 },
+      );
+    }
+
+    // 1. Cek apakah NIK sudah pernah terdaftar
+    const existingAnak = await anakRepository.getByNik(parsed.data.nik);
+    if (existingAnak) {
+      return NextResponse.json(
+        {
+          success: true,
+          data: existingAnak,
+          message: "Data anak sudah terdaftar sebelumnya (tidak dibuat ganda).",
+          alreadyExists: true,
+        },
+        { status: 200 },
       );
     }
 

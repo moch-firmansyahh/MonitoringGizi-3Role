@@ -71,11 +71,25 @@ export async function PATCH(
     }
 
     // Buat notifikasi riwayat status untuk Orang Tua & Posyandu
+    const judulNotif =
+      status === "ditindaklanjuti"
+        ? "Rujukan Ditindaklanjuti Dokter Puskesmas"
+        : status === "diterima"
+        ? "Rujukan Diterima Dokter Puskesmas"
+        : `Status Rujukan Balita: ${status.toUpperCase()}`;
+
+    const isiNotif =
+      status === "ditindaklanjuti"
+        ? `Pemeriksaan poli KIA Puskesmas Bojongsoang selesai. Resep & Tindakan: ${note || "Diberikan paket PMT pemulihan biskuit protein dan edukasi gizi."}`
+        : status === "diterima"
+        ? `Rujukan pasien balita telah diterima oleh dokter Puskesmas Bojongsoang. ${note ? `Catatan: ${note}` : ""}`
+        : `Puskesmas telah memperbarui status rujukan anak menjadi ${status}. ${note ? `Catatan: ${note}` : ""}`;
+
     await notifikasiRepository.create({
-      idPenerima: "c0000000-0000-0000-0000-000000000003", // Orang Tua
+      idPenerima: "c0000000-0000-0000-0000-000000000003", // Orang Tua Arfan
       jenis: "rujukan_status",
-      judul: `Status Rujukan Balita: ${status.toUpperCase()}`,
-      isi: `Puskesmas telah memperbarui status rujukan anak menjadi ${status}. ${note ? `Catatan: ${note}` : ""}`,
+      judul: judulNotif,
+      isi: isiNotif,
       tautan: "/orang-tua/notifikasi",
     });
 

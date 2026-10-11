@@ -221,12 +221,14 @@ export default function PencatatanAnakPage() {
       addDataAnak(newChildRecord);
 
       // Tentukan targetIdAnak agar tersambung presisi dengan database server
-      const targetServerId =
-        formData.nikBalita === "3201948392010001"
-          ? "d0000000-0000-0000-0000-000000000001"
-          : formData.nikBalita === "3201948392010002"
-            ? "d0000000-0000-0000-0000-000000000002"
-            : newChildRecord.id;
+      let targetServerId = newChildRecord.id;
+      const numNikMatch = formData.nikBalita.match(/^320194839201(\d{4})$/);
+      if (numNikMatch) {
+        const num = parseInt(numNikMatch[1], 10);
+        if (num >= 1 && num <= 30) {
+          targetServerId = `d0000000-0000-0000-0000-${String(num).padStart(12, "0")}`;
+        }
+      }
 
       // 1. Sinkronisasi profil anak ke server
       fetch("/api/anak", {

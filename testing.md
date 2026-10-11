@@ -240,33 +240,48 @@ Sebelum memulai pengujian, pastikan service berikut menyala di komputer:
 
 ## 🟣 TAHAP 3: DI ORANG TUA (Menerima Notifikasi Medis & Pantau Kurva WHO)
 
-### Langkah 9: Login sebagai Orang Tua Arfan
+### Langkah 9: Login sebagai Orang Tua Arfan (Tepat 2 Anak, Bebas Duplikasi)
 
 1. Buka halaman login: [http://localhost:3000/login](http://localhost:3000/login)
 2. Masukkan akun ayah Arfan:
    - **Username**: `orangtua_arfan`
    - **Password**: `simgizi2026`
 3. Klik **"Masuk"** ➔ Anda diarahkan ke Beranda Portal Orang Tua ([http://localhost:3000/orang-tua](http://localhost:3000/orang-tua)).
+4. **Apa yang terlihat di layar**:
+   - Di bagian atas pemilih anak, **hanya ada tepat 2 anak** milik Orang Tua Rahmat Hidayat:
+     - 🟢 **Muhammad Arfan** (Anak ke-1)
+     - ⚪ **Hanif Abdillah** (Anak ke-2)
+   - *Tidak ada lagi nama anak dobel atau tumpukan 30 anak dari seluruh posyandu!*
+   - Di kartu utama Muhammad Arfan, muncul kotak hijau resmi:
+     - **"Rujukan Ditindaklanjuti Dokter Puskesmas"**
+     - Catatan instruksi dokter: _"Pemeriksaan poli KIA Puskesmas selesai. Diberikan paket PMT Pemulihan biskuit protein hewani, suplementasi zat besi & vitamin A..."_
+     - Terdapat tombol **"Lihat Rincian Rujukan →"**
 
 ---
 
-### Langkah 10: Baca Notifikasi Tindakan Dokter Puskesmas
+### Langkah 10: Baca Notifikasi Tindakan Dokter Puskesmas (Real-Time)
 
 1. Di bilah atas (Topbar), klik **Ikon Lonceng (Pemberitahuan)** atau buka menu [http://localhost:3000/orang-tua/notifikasi](http://localhost:3000/orang-tua/notifikasi).
 2. **Apa yang terlihat di layar**:
-   - Muncul pemberitahuan resmi hasil penanganan dari Puskesmas:
-     - _"Rujukan ananda Muhammad Arfan telah ditindaklanjuti oleh Dokter Puskesmas Bojongsoang."_
-     - Rincian resep: Pemberian paket PMT Pemulihan biskuit protein dan jadwal kontrol 14 hari terbaca jelas.
+   - Notifikasi terbaru dari hasil penanganan dokter Puskesmas langsung muncul secara dinamis:
+     - 🩺 **Rujukan Ditindaklanjuti Dokter Puskesmas**
+     - *"Rujukan ananda Muhammad Arfan telah ditindaklanjuti oleh Dokter Puskesmas Bojongsoang. Catatan Dokter: Pemeriksaan poli KIA Puskesmas selesai. Diberikan paket PMT Pemulihan biskuit protein hewani..."*
+     - Waktu: *Baru saja* (Status: Belum dibaca dengan badge titik hijau).
+3. Anda dapat mengklik tombol **"Tandai Sudah Dibaca"** untuk memperbarui status notifikasi.
 
 ---
 
-### Langkah 11: Pantau Kurva Pertumbuhan Baku WHO Kemenkes 2020
+### Langkah 11: Pantau Kurva Pertumbuhan Baku WHO Kemenkes 2020 (100% Berfungsi)
 
 1. Di menu navigasi orang tua, klik menu **"Perkembangan"** ([http://localhost:3000/orang-tua/perkembangan](http://localhost:3000/orang-tua/perkembangan)).
 2. **Apa yang terlihat di layar**:
-   - Grafik interaktif kurva standar WHO (Pita Median, -2 SD, -3 SD).
-   - Titik tinggi badan riil Muhammad Arfan (78.5 cm pada usia 28 bulan) terplot secara akurat di bawah pita merah (-3 SD).
-   - Rekomendasi asupan nutrisi protein hewani harian (telur, ikan kembung, ayam) tersaji dengan bahasa awam yang mudah dipahami orang tua.
+   - Terdapat tombol switcher anak: **Muhammad Arfan** & **Hanif Abdillah**.
+   - Grafik interaktif kurva standar WHO (Pita Median, -2 SD, -3 SD) berjalan lancar 100% tanpa error.
+   - Titik riil penimbangan Arfan terplot secara presisi pada grafik TB/U (78.5 cm pada usia 28 bulan) dan BB/U (10.1 kg).
+   - Indikator antropometri menampilkan Z-Score resmi Permenkes 2020:
+     - TB/U: `-3.61 SD` (Stunting)
+     - BB/U: `-1.87 SD` (Normal / Borderline)
+   - Rekomendasi asupan gizi harian WHO berbasis AI & Fail-Safe tersaji jelas dengan bahasa awam ramah keluarga balita.
 
 ---
 

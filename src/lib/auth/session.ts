@@ -86,15 +86,15 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
   const roleCookie = cookieStore.get(ROLE_COOKIE_NAME)?.value as RolePengguna | undefined;
 
   if (!sessionToken) {
-    // Backward compatibility check untuk legacy cookie jika ada
-    const legacyAuth = cookieStore.get("simgizi-auth")?.value;
-    if (legacyAuth === "true") {
-      return DEMO_PROFILES.kelompok2;
-    }
-    // Jika roleCookie ada (disimpan oleh login atau client)
+    // 1. Jika roleCookie ada (disimpan oleh login atau client), prioritaskan ini!
     if (roleCookie) {
       if (roleCookie === "puskesmas") return DEMO_PROFILES.puskesmas_bojongsoang;
       if (roleCookie === "orang_tua") return DEMO_PROFILES.orangtua_arfan;
+      return DEMO_PROFILES.kelompok2;
+    }
+    // 2. Backward compatibility check untuk legacy cookie jika ada
+    const legacyAuth = cookieStore.get("simgizi-auth")?.value;
+    if (legacyAuth === "true") {
       return DEMO_PROFILES.kelompok2;
     }
     // Fallback development & demo lingkungan lokal agar pengujian alur tidak gagal 401

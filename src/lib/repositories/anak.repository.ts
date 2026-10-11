@@ -39,16 +39,29 @@ const INITIAL_ANAK_SEED: Anak[] = dataAnak.map((d, idx) => {
 
 const globalForAnak = globalThis as unknown as {
   __localAnakStore?: Anak[];
+  __localAnakStoreVersion?: number;
 };
 
-if (!globalForAnak.__localAnakStore) {
-  globalForAnak.__localAnakStore = [...INITIAL_ANAK_SEED];
-}
+const CURRENT_ANAK_STORE_VERSION = 2;
 
 const getAnakStore = (): Anak[] => {
-  if (!globalForAnak.__localAnakStore) {
+  if (
+    !globalForAnak.__localAnakStore ||
+    globalForAnak.__localAnakStoreVersion !== CURRENT_ANAK_STORE_VERSION
+  ) {
     globalForAnak.__localAnakStore = [...INITIAL_ANAK_SEED];
+    globalForAnak.__localAnakStoreVersion = CURRENT_ANAK_STORE_VERSION;
   }
+  // Deduplikasi ketat by NIK
+  const seenNiks = new Set<string>();
+  const uniqueList: Anak[] = [];
+  for (const a of globalForAnak.__localAnakStore) {
+    if (!seenNiks.has(a.nik)) {
+      seenNiks.add(a.nik);
+      uniqueList.push(a);
+    }
+  }
+  globalForAnak.__localAnakStore = uniqueList;
   return globalForAnak.__localAnakStore;
 };
 
@@ -138,7 +151,22 @@ export const anakRepository = {
     );
   },
 
+  async getByNik(nik: string): Promise<Anak | null> {
+    const store = getAnakStore();
+    return store.find((a) => a.nik === nik) || null;
+  },
+
   async create(data: CreateAnakPayload, createdByUserId?: string): Promise<Anak> {
+    const store = getAnakStore();
+    // 1. Validasi deduplikasi: Jika NIK sudah terdaftar, jangan buat data baru!
+    const existing = store.find((a) => a.nik === data.nik);
+    if (existing) {
+      if (data.nama) existing.nama = data.nama;
+      if (data.namaOrangTua) existing.namaOrangTua = data.namaOrangTua;
+      if (data.alamat) existing.alamat = data.alamat;
+      return existing;
+    }
+
     const newAnak: Anak = {
       id: crypto.randomUUID(),
       nik: data.nik,
@@ -172,7 +200,7 @@ export const anakRepository = {
       }
     }
 
-    getAnakStore().unshift(newAnak);
+    store.unshift(newAnak);
     return newAnak;
   },
 

@@ -26,6 +26,11 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
   namaAnak = "Balita",
 }) => {
   const [activeTab, setActiveTab] = useState<"TBU" | "BBU">("TBU");
+  const isMounted = React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   // Gabungkan data kurva referensi dengan titik pengukuran anak
   const isTBU = activeTab === "TBU";
@@ -94,11 +99,12 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
 
       {/* Chart Canvas */}
       <div className="w-full h-[320px] sm:h-[380px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart
-            data={chartData}
-            margin={{ top: 10, right: 15, left: -10, bottom: 0 }}
-          >
+        {isMounted ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
+              data={chartData}
+              margin={{ top: 10, right: 15, left: -10, bottom: 0 }}
+            >
             <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
             <XAxis
               dataKey="usia"
@@ -208,7 +214,12 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
             />
           </ComposedChart>
         </ResponsiveContainer>
-      </div>
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-zinc-400 text-[13px] animate-pulse">
+          Menyiapkan kurva pertumbuhan WHO...
+        </div>
+      )}
+    </div>
     </div>
   );
 };
