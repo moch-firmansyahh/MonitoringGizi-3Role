@@ -8,6 +8,8 @@ Dokumen ini menjelaskan arsitektur terdistribusi berbasis **Message Broker (Rabb
 
 Sistem SimGizi mengadopsi pola **Event-Driven Architecture (EDA)** menggunakan RabbitMQ untuk memisahkan proses transaksi input posyandu dengan layanan hilir secara asynchronous (non-blocking).
 
+![Diagram Arsitektur Message Broker RabbitMQ SimGizi](./diagram-message-broker.png)
+
 ```
    [ POSYANDU ]              [ PUSKESMAS ]
  (Input Pengukuran /       (Update Status

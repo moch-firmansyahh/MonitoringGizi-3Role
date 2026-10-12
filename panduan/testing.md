@@ -8,6 +8,8 @@ Panduan ini disusun secara berurutan dan transparan, menjelaskan **di halaman ma
 
 ## 🧭 Peta Arsitektur & Titik Kerja Message Broker (RabbitMQ)
 
+![Diagram Arsitektur Message Broker RabbitMQ SimGizi](./diagram-message-broker.png)
+
 ```mermaid
 flowchart TD
     subgraph Posyandu ["🟢 1. KADER POSYANDU (Producer Awal)"]
@@ -50,11 +52,11 @@ flowchart TD
 
 Berikut adalah daftar lengkap komponen Message Broker yang bekerja di dalam sistem SimGizi:
 
-| # | Titik Operasi | Event & Routing Key | Exchange | Publisher (Pengirim) | Queues (Penerima) | Consumer (Worker) | Dampak Fungsional & UI |
-| :- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1** | Penimbangan Balita Baru | `pengukuran.created` | `simgizi.events` (Topic) | `POST /api/pengukuran`<br>(Kader Posyandu) | • `simgizi.puskesmas.triage`<br>• `simgizi.orangtua.notifikasi`<br>• `simgizi.audit.laporan` | **Consumer 1, 2, & 3** | Peringatan dini stunting masuk ke Puskesmas, notifikasi pertumbuhan masuk ke HP/Portal ortu, log diaudit. |
-| **2** | Deteksi Balita Berisiko | `rujukan.created` | `simgizi.events` (Topic) | `POST /api/rujukan`<br>(Posyandu / Sistem) | • `simgizi.puskesmas.triage`<br>• `simgizi.orangtua.notifikasi`<br>• `simgizi.audit.laporan` | **Consumer 1, 2, & 3** | Tiket rujukan masuk antrean triage Poli KIA Puskesmas, ortu mendapat info rujukan diajukan. |
-| **3** | Resep / Tindakan Dokter | `rujukan.updated` | `simgizi.events` (Topic) | `PATCH /api/rujukan/[id]`<br>(Dokter Puskesmas) | • `simgizi.orangtua.notifikasi`<br>• `simgizi.audit.laporan` | **Consumer 2 & 3** | Notifikasi instruksi resep PMT & jadwal kontrol tiba di Portal Orang Tua secara real-time. |
+| #     | Titik Operasi           | Event & Routing Key  | Exchange                 | Publisher (Pengirim)                            | Queues (Penerima)                                                                            | Consumer (Worker)      | Dampak Fungsional & UI                                                                                    |
+| :---- | :---------------------- | :------------------- | :----------------------- | :---------------------------------------------- | :------------------------------------------------------------------------------------------- | :--------------------- | :-------------------------------------------------------------------------------------------------------- |
+| **1** | Penimbangan Balita Baru | `pengukuran.created` | `simgizi.events` (Topic) | `POST /api/pengukuran`<br>(Kader Posyandu)      | • `simgizi.puskesmas.triage`<br>• `simgizi.orangtua.notifikasi`<br>• `simgizi.audit.laporan` | **Consumer 1, 2, & 3** | Peringatan dini stunting masuk ke Puskesmas, notifikasi pertumbuhan masuk ke HP/Portal ortu, log diaudit. |
+| **2** | Deteksi Balita Berisiko | `rujukan.created`    | `simgizi.events` (Topic) | `POST /api/rujukan`<br>(Posyandu / Sistem)      | • `simgizi.puskesmas.triage`<br>• `simgizi.orangtua.notifikasi`<br>• `simgizi.audit.laporan` | **Consumer 1, 2, & 3** | Tiket rujukan masuk antrean triage Poli KIA Puskesmas, ortu mendapat info rujukan diajukan.               |
+| **3** | Resep / Tindakan Dokter | `rujukan.updated`    | `simgizi.events` (Topic) | `PATCH /api/rujukan/[id]`<br>(Dokter Puskesmas) | • `simgizi.orangtua.notifikasi`<br>• `simgizi.audit.laporan`                                 | **Consumer 2 & 3**     | Notifikasi instruksi resep PMT & jadwal kontrol tiba di Portal Orang Tua secara real-time.                |
 
 ---
 
@@ -66,27 +68,27 @@ Sebelum memulai pengujian, pastikan service berikut menyala di komputer:
    ```bash
    docker ps
    ```
-   *(Jika belum jalan, jalankan: `docker start simgizi-rabbitmq` atau `docker compose up -d`)*
+   _(Jika belum jalan, jalankan: `docker start simgizi-rabbitmq` atau `docker compose up -d`)_
 2. **Terminal 1 — Web Server (Next.js)**:
    ```bash
    npm run dev
    ```
-   *Buka di browser:* [http://localhost:3000](http://localhost:3000)
+   _Buka di browser:_ [http://localhost:3000](http://localhost:3000)
 3. **Terminal 2 — Message Broker Consumer Worker (Daemon)**:
    ```bash
    npm run worker
    ```
-   *Terminal ini akan menampilkan log pesan saat event diterbitkan.*
+   _Terminal ini akan menampilkan log pesan saat event diterbitkan._
 
 ---
 
 ## 📑 Kredensial Akun Pengujian Resmi
 
-| Peran Pengguna | Username | Password | Wilayah / Fasilitas | URL Halaman Utama |
-| :--- | :--- | :--- | :--- | :--- |
-| **Kader Posyandu** | `kelompok2` | `simgizi2026` | Posyandu Melati 03 | [http://localhost:3000/](http://localhost:3000/) |
+| Peran Pengguna       | Username                | Password      | Wilayah / Fasilitas   | URL Halaman Utama                                                  |
+| :------------------- | :---------------------- | :------------ | :-------------------- | :----------------------------------------------------------------- |
+| **Kader Posyandu**   | `kelompok2`             | `simgizi2026` | Posyandu Melati 03    | [http://localhost:3000/](http://localhost:3000/)                   |
 | **Dokter Puskesmas** | `puskesmas_bojongsoang` | `simgizi2026` | Puskesmas Bojongsoang | [http://localhost:3000/puskesmas](http://localhost:3000/puskesmas) |
-| **Orang Tua Balita** | `orangtua_arfan` | `simgizi2026` | Keluarga Arfan | [http://localhost:3000/orang-tua](http://localhost:3000/orang-tua) |
+| **Orang Tua Balita** | `orangtua_arfan`        | `simgizi2026` | Keluarga Arfan        | [http://localhost:3000/orang-tua](http://localhost:3000/orang-tua) |
 
 ---
 
@@ -95,18 +97,21 @@ Sebelum memulai pengujian, pastikan service berikut menyala di komputer:
 Sistem SimGizi menerapkan standardisasi struktur data: **1 Posyandu = 10 Balita**, dan **1 Orang Tua = 2 Balita** (sehingga terdapat **5 Orang Tua per Posyandu**):
 
 ### 1. Posyandu Melati 03 (RW 03, Bojongsoang) — 10 Balita & 5 Orang Tua
-| # | Nama Orang Tua | Balita ke-1 | Status Gizi | Balita ke-2 | Status Gizi |
-| :- | :--- | :--- | :--- | :--- | :--- |
-| **1** | **Rahmat Hidayat** (`orangtua_arfan`) | **Muhammad Arfan** (28 bln) | 🟠 Stunting | **Hanif Abdillah** (18 bln) | 🟢 Normal |
-| **2** | **Hendra Wijaya** | Aisyah Putri Humaira (14 bln) | 🟠 Stunting | Siti Nurbaya (22 bln) | 🟢 Normal |
-| **3** | **Ferry Irawan** | Kenzo Rafasya (32 bln) | 🟡 Gizi Kurang | Bagas Maulana (16 bln) | 🟢 Normal |
-| **4** | **Budi Saputra** | Andi Saputra (24 bln) | 🟡 Gizi Kurang | Rania Azzahra (20 bln) | 🟢 Normal |
-| **5** | **Ibrahim Hasan** | Dafa Ibrahim (20 bln) | 🔴 Gizi Buruk | Daffa Pratama (34 bln) | 🟢 Normal |
+
+| #     | Nama Orang Tua                        | Balita ke-1                   | Status Gizi    | Balita ke-2                 | Status Gizi |
+| :---- | :------------------------------------ | :---------------------------- | :------------- | :-------------------------- | :---------- |
+| **1** | **Rahmat Hidayat** (`orangtua_arfan`) | **Muhammad Arfan** (28 bln)   | 🟠 Stunting    | **Hanif Abdillah** (18 bln) | 🟢 Normal   |
+| **2** | **Hendra Wijaya**                     | Aisyah Putri Humaira (14 bln) | 🟠 Stunting    | Siti Nurbaya (22 bln)       | 🟢 Normal   |
+| **3** | **Ferry Irawan**                      | Kenzo Rafasya (32 bln)        | 🟡 Gizi Kurang | Bagas Maulana (16 bln)      | 🟢 Normal   |
+| **4** | **Budi Saputra**                      | Andi Saputra (24 bln)         | 🟡 Gizi Kurang | Rania Azzahra (20 bln)      | 🟢 Normal   |
+| **5** | **Ibrahim Hasan**                     | Dafa Ibrahim (20 bln)         | 🔴 Gizi Buruk  | Daffa Pratama (34 bln)      | 🟢 Normal   |
 
 ### 2. Posyandu Mekar Sari 01 (RW 01, Lengkong) — 10 Balita & 5 Orang Tua
+
 - 5 Keluarga (Dian Permana, Wahyu Setiawan, Agus Prasetyo, Rudi Hartono, Joko Susanto) dengan masing-masing 2 anak (Total 10 anak).
 
 ### 3. Posyandu Mawar 02 (RW 02, Buahbatu) — 10 Balita & 5 Orang Tua
+
 - 5 Keluarga (Bambang Pamungkas, Ade Kurniawan, Eko Yulianto, Surya Kencana, Gunawan Wibowo) dengan masing-masing 2 anak (Total 10 anak).
 
 ---
@@ -114,6 +119,7 @@ Sistem SimGizi menerapkan standardisasi struktur data: **1 Posyandu = 10 Balita*
 ## 🔄 Aturan Input Penimbangan (Pencegahan Duplikasi NIK)
 
 Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
+
 1. **Jika NIK Sudah Terdaftar (Contoh: NIK `3201948392010001` - Muhammad Arfan)**:
    - Sistem mendeteksi anak sudah ada di basis data.
    - Sistem **TIDAK membuat data anak baru**, melainkan menambahkan hasil penimbangan terbaru ke riwayat anak yang bersangkutan.
@@ -130,6 +136,7 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
 ## 🟢 TAHAP 1: DI POSYANDU (Penimbangan Balita & Penerbitan Event Broker)
 
 ### Langkah 1: Login sebagai Kader Posyandu
+
 1. Buka browser: [http://localhost:3000/login](http://localhost:3000/login)
 2. Masukkan akun kader:
    - **Username**: `kelompok2`
@@ -139,6 +146,7 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
 ---
 
 ### Langkah 2: Input Penimbangan Balita Muhammad Arfan
+
 1. Di sidebar kiri, klik menu **"Pencatatan Data Anak"** ([http://localhost:3000/pencatatan-anak](http://localhost:3000/pencatatan-anak)).
 2. Isi formulir penimbangan dengan data baku pengujian berikut:
    - **Nama Balita**: `Muhammad Arfan`
@@ -151,7 +159,7 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
    - **Alamat**: `Jl. Sukabirus No. 14, RT 02/03`
 3. Klik tombol hijau: **"Tambah data balita"**.
 4. **Apa yang terlihat di layar**:
-   - Notifikasi Toast hijau muncul: *"Data Balita berhasil ditambahkan"*.
+   - Notifikasi Toast hijau muncul: _"Data Balita berhasil ditambahkan"_.
    - Z-Score WHO Permenkes 2020 terhitung otomatis: **TB/U = `-3.61 SD`** (Kategori: **`Stunting`**).
 
 ```
@@ -185,6 +193,7 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
 ---
 
 ### Langkah 3: Periksa Daftar Balita Posyandu (Deduplikasi Bersih / Tidak Dobel)
+
 1. Di sidebar kiri, buka menu **"Rekap Data Gizi"** ([http://localhost:3000/rekap-data-gizi](http://localhost:3000/rekap-data-gizi)).
 2. **Perhatikan tabel**:
    - Nama **Muhammad Arfan** hanya ada **1 baris** (tidak ada baris ganda/dobel).
@@ -193,6 +202,7 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
 ---
 
 ### Langkah 4: Periksa Status Tiket Rujukan di Posyandu
+
 1. Di sidebar kiri, klik menu **"Rujukan"** ([http://localhost:3000/rujukan](http://localhost:3000/rujukan)).
 2. Anda melihat tiket rujukan pasien **Muhammad Arfan** sudah tercatat dengan status **`Diajukan`** ke Puskesmas Bojongsoang.
 3. Klik tombol **Logout** (Ikon keluar merah di kiri bawah atau avatar kanan atas).
@@ -202,6 +212,7 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
 ## 🔵 TAHAP 2: DI PUSKESMAS (Triage Medis, Rincian Riwayat & Resep Dokter)
 
 ### Langkah 5: Login sebagai Dokter Puskesmas
+
 1. Buka halaman login: [http://localhost:3000/login](http://localhost:3000/login)
 2. Masukkan akun dokter:
    - **Username**: `puskesmas_bojongsoang`
@@ -211,6 +222,7 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
 ---
 
 ### Langkah 6: Cek Triage Balita Berisiko (Seluruh 11 Balita Tampil Lengkap)
+
 1. Di sidebar kiri, klik menu **"Balita Berisiko"** ([http://localhost:3000/puskesmas/balita-berisiko](http://localhost:3000/puskesmas/balita-berisiko)).
 2. **Perhatikan hasil triage**:
    - Tampil **seluruh 11 balita berisiko** dari 3 posyandu binaan, terurut berdasarkan tingkat kegawatdaruratan klinis:
@@ -222,6 +234,7 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
 ---
 
 ### Langkah 7: Buka Halaman Rincian Riwayat Pengukuran Arfan
+
 1. Pada baris / kartu **Muhammad Arfan**, klik tombol **"Detail"** (URL: `/anak/d0000000-0000-0000-0000-000000000001`).
 2. **Lihat Bagian "Riwayat Pengukuran Antropometri" (Tabel Rincian)**:
    - Di sini tampak jelas bahwa data anak tidak didobel di daftar utama, melainkan **bertambah di tabel rincian pengukuran**:
@@ -232,12 +245,13 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
 ---
 
 ### Langkah 8: Dokter Memberikan Tindakan & Resep PMT
+
 1. Di sidebar kiri, klik menu **"Rujukan"** ([http://localhost:3000/puskesmas/rujukan](http://localhost:3000/puskesmas/rujukan)).
 2. Cari baris rujukan pasien **Muhammad Arfan** (status `Diajukan`):
    - **Klik Tombol "Terima"** ➔ Status berubah menjadi **`Diterima`**.
    - **Klik Tombol "Tindak Lanjut"** ➔ Muncul modal form tindakan medis.
 3. Masukkan catatan instruksi dokter:
-   > *"Pemeriksaan poli KIA Puskesmas selesai. Diberikan paket PMT Pemulihan biskuit protein hewani, suplementasi zat besi & vitamin A. Edukasi sanitasi air bersih serta jadwalkan kontrol ulang 14 hari ke depan."*
+   > _"Pemeriksaan poli KIA Puskesmas selesai. Diberikan paket PMT Pemulihan biskuit protein hewani, suplementasi zat besi & vitamin A. Edukasi sanitasi air bersih serta jadwalkan kontrol ulang 14 hari ke depan."_
 4. Klik **"Simpan Tindakan"** ➔ Status rujukan resmi menjadi **`Ditindaklanjuti`**.
 
 ```
@@ -276,7 +290,7 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
    - Di bagian atas pemilih anak, **hanya ada tepat 2 anak** milik Orang Tua Rahmat Hidayat:
      - 🟢 **Muhammad Arfan** (Anak ke-1)
      - ⚪ **Hanif Abdillah** (Anak ke-2)
-   - *Tidak ada lagi nama anak dobel atau tumpukan 30 anak dari seluruh posyandu!*
+   - _Tidak ada lagi nama anak dobel atau tumpukan 30 anak dari seluruh posyandu!_
    - Di kartu utama Muhammad Arfan, muncul kotak hijau resmi:
      - **"Rujukan Ditindaklanjuti Dokter Puskesmas"**
      - Catatan instruksi dokter: _"Pemeriksaan poli KIA Puskesmas selesai. Diberikan paket PMT Pemulihan biskuit protein hewani, suplementasi zat besi & vitamin A..."_
@@ -290,8 +304,8 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
 2. **Apa yang terlihat di layar**:
    - Notifikasi terbaru dari hasil penanganan dokter Puskesmas langsung muncul secara dinamis:
      - 🩺 **Rujukan Ditindaklanjuti Dokter Puskesmas**
-     - *"Rujukan ananda Muhammad Arfan telah ditindaklanjuti oleh Dokter Puskesmas Bojongsoang. Catatan Dokter: Pemeriksaan poli KIA Puskesmas selesai. Diberikan paket PMT Pemulihan biskuit protein hewani..."*
-     - Waktu: *Baru saja* (Status: Belum dibaca dengan badge titik hijau).
+     - _"Rujukan ananda Muhammad Arfan telah ditindaklanjuti oleh Dokter Puskesmas Bojongsoang. Catatan Dokter: Pemeriksaan poli KIA Puskesmas selesai. Diberikan paket PMT Pemulihan biskuit protein hewani..."_
+     - Waktu: _Baru saja_ (Status: Belum dibaca dengan badge titik hijau).
 3. Anda dapat mengklik tombol **"Tandai Sudah Dibaca"** untuk memperbarui status notifikasi.
 
 ---
@@ -315,12 +329,15 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
 Bagi penguji teknis yang ingin membuktikan integritas antrean RabbitMQ secara independen:
 
 ### 1. Cek Endpoint Status Healthcheck Broker
+
 Buka di browser atau jalankan perintah curl:
+
 ```bash
 curl http://localhost:3000/api/broker/status
 ```
 
 **Respon JSON**:
+
 ```json
 {
   "connected": true,
@@ -347,6 +364,7 @@ curl http://localhost:3000/api/broker/status
 ```
 
 ### 2. Cek Dashboard RabbitMQ Management UI
+
 1. Buka browser: [http://localhost:15672](http://localhost:15672)
 2. Login:
    - **Username**: `simgizi`

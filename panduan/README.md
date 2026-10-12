@@ -1,49 +1,51 @@
-# Indeks Dokumen & Panduan Resmi — SimGizi
+# 📘 Pusat Panduan & Dokumentasi Resmi — SimGizi
 
-Folder ini memuat seluruh dokumen teknis, panduan operasional, master data pengujian, dan spesifikasi arsitektur resmi untuk sistem **SimGizi**.
+Folder ini memuat panduan operasional, diagram arsitektur, dan alur pengujian resmi untuk sistem **SimGizi**.
 
 ---
 
-## Daftar Panduan & Dokumen
+## 🖼️ Diagram Arsitektur Message Broker (RabbitMQ)
 
-| No | Nama Dokumen | Tautan Dokumen | Deskripsi & Kegunaan |
+![Diagram Arsitektur Message Broker RabbitMQ SimGizi](./diagram-message-broker.png)
+
+---
+
+## 📑 Daftar Dokumen Panduan
+
+| No | Dokumen | Tautan | Deskripsi & Kegunaan |
 | :---: | :--- | :--- | :--- |
-| **1** | **Panduan Akun & Data CRUD** | [PANDUAN_AKUN_DAN_DATA_CRUD.md](./PANDUAN_AKUN_DAN_DATA_CRUD.md) | Daftar 6 akun pengguna (2 Posyandu, 2 Puskesmas, 2 Orang Tua), master data faskes, NIK balita binaan, dan langkah simulasi pengujian CRUD. |
-| **2** | **Panduan Message Broker (RabbitMQ)** | [PANDUAN_MESSAGE_BROKER_RABBITMQ.md](./PANDUAN_MESSAGE_BROKER_RABBITMQ.md) | Panduan arsitektur terdistribusi RabbitMQ via Docker, antrean (*queues*), worker daemon (`npm run worker`), dan skrip simulasi event broker. |
-| **3** | **Alur Pengujian Terpadu (Testing Walkthrough)** | [testing.md](./testing.md) | Panduan langkah demi langkah pengujian alur 3 role (Posyandu -> Puskesmas -> Orang Tua) beserta data inputan dan RabbitMQ. |
-| **4** | **Spesifikasi Kasus Uji (Test Case)** | [testcase.md](./testcase.md) | Dokumen formal pengujian QA mencakup 7 modul fungsional dan 25 kasus uji (pre-kondisi, step-by-step, expected result, actual result, status PASS). |
-| **5** | **Cetak Biru Arsitektur (Architecture Blueprint)** | [PLAN_ARSITEKTUR.md](./PLAN_ARSITEKTUR.md) | Cetak biru arsitektur Clean Architecture, skema basis data PostgreSQL/Supabase, RBAC, dan keputusan teknologi. |
+| **1** | **Panduan Pengujian End-to-End** | [`testing.md`](./testing.md) | Panduan alur pengujian lengkap 1 jalur (Kader Posyandu $\rightarrow$ Dokter Puskesmas $\rightarrow$ Orang Tua Balita) beserta master data 30 balita & integrasi Message Broker. |
+| **2** | **Panduan Message Broker RabbitMQ** | [`PANDUAN_MESSAGE_BROKER_RABBITMQ.md`](./PANDUAN_MESSAGE_BROKER_RABBITMQ.md) | Arsitektur detail RabbitMQ, topologi topic exchange `simgizi.events`, 3 queues, fail-safe degradation, dan perintah verifikasi teknis. |
 
 ---
 
-## Ringkasan Kredensial Pengujian (Cepat)
+## 🔑 Kredensial Akun Pengujian
 
-> 🔑 **Kata Sandi Seluruh Akun**: `simgizi2026`
+> **Kata Sandi (Password) Seluruh Akun**: `simgizi2026`
 
-- **Posyandu 1**: `kelompok2` (Bidan Sri Wahyuni — Posyandu Melati 03)
-- **Posyandu 2**: `posyandu_mekarsari01` (Kader Siti Nurhaliza — Posyandu Mekar Sari 01)
-- **Puskesmas 1**: `puskesmas_bojongsoang` (Dr. Hj. Syahla Mutiara Latifah, M.Kes — Puskesmas Bojongsoang)
-- **Puskesmas 2**: `puskesmas_dayeuhkolot` (Dr. Ahmad Fauzi, Sp.A — Puskesmas Dayeuhkolot)
-- **Orang Tua 1**: `orangtua_arfan` (Rahmat Hidayat — Wali Muhammad Arfan)
-- **Orang Tua 2**: `orangtua_aisyah` (Hendra Wijaya — Wali Aisyah Putri Humaira)
+| Peran | Akun Login | Faskes / Profil | URL Akses |
+| :--- | :--- | :--- | :--- |
+| **Kader Posyandu** | `kelompok2` | Posyandu Melati 03 | [http://localhost:3000/](http://localhost:3000/) |
+| **Dokter Puskesmas** | `puskesmas_bojongsoang` | Puskesmas Bojongsoang | [http://localhost:3000/puskesmas](http://localhost:3000/puskesmas) |
+| **Orang Tua Balita** | `orangtua_arfan` | Rahmat Hidayat (Ayah Arfan & Hanif) | [http://localhost:3000/orang-tua](http://localhost:3000/orang-tua) |
 
 ---
 
-## Perintah Penting untuk Pengujian
+## ⚡ Perintah Cepat Pengujian
 
 ```bash
-# 1. Menjalankan Docker RabbitMQ
+# 1. Jalankan Container Docker RabbitMQ
 docker compose up -d
 
-# 2. Menjalankan Worker Daemon Message Broker
+# 2. Jalankan Worker Daemon (Terminal Khusus)
 npm run worker
 
-# 3. Menjalankan Simulasi Pengujian Event Broker
+# 3. Jalankan Pengujian Otomatis Event Broker
 npm run test:broker
 
-# 4. Menjalankan Otomasi Pengujian Vitest
+# 4. Jalankan Unit Test Vitest
 npm test
 
-# 5. Menjalankan Web Server Dev
+# 5. Jalankan Web Server Aplikasi
 npm run dev
 ```
