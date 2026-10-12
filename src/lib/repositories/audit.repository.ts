@@ -211,4 +211,8 @@ export const auditRepository = {
       lastEvent: list[0] || null,
     };
   },
+
+  async reset(): Promise<void> {
+    globalForAudit.__localAuditStore = [...INITIAL_AUDIT_LOGS];
+  },
 };
