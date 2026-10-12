@@ -90,6 +90,39 @@ Sebelum memulai pengujian, pastikan service berikut menyala di komputer:
 
 ---
 
+## 🏛️ Struktur Data Master (3 Posyandu, 15 Orang Tua, 30 Balita)
+
+Sistem SimGizi menerapkan standardisasi struktur data: **1 Posyandu = 10 Balita**, dan **1 Orang Tua = 2 Balita** (sehingga terdapat **5 Orang Tua per Posyandu**):
+
+### 1. Posyandu Melati 03 (RW 03, Bojongsoang) — 10 Balita & 5 Orang Tua
+| # | Nama Orang Tua | Balita ke-1 | Status Gizi | Balita ke-2 | Status Gizi |
+| :- | :--- | :--- | :--- | :--- | :--- |
+| **1** | **Rahmat Hidayat** (`orangtua_arfan`) | **Muhammad Arfan** (28 bln) | 🟠 Stunting | **Hanif Abdillah** (18 bln) | 🟢 Normal |
+| **2** | **Hendra Wijaya** | Aisyah Putri Humaira (14 bln) | 🟠 Stunting | Siti Nurbaya (22 bln) | 🟢 Normal |
+| **3** | **Ferry Irawan** | Kenzo Rafasya (32 bln) | 🟡 Gizi Kurang | Bagas Maulana (16 bln) | 🟢 Normal |
+| **4** | **Budi Saputra** | Andi Saputra (24 bln) | 🟡 Gizi Kurang | Rania Azzahra (20 bln) | 🟢 Normal |
+| **5** | **Ibrahim Hasan** | Dafa Ibrahim (20 bln) | 🔴 Gizi Buruk | Daffa Pratama (34 bln) | 🟢 Normal |
+
+### 2. Posyandu Mekar Sari 01 (RW 01, Lengkong) — 10 Balita & 5 Orang Tua
+- 5 Keluarga (Dian Permana, Wahyu Setiawan, Agus Prasetyo, Rudi Hartono, Joko Susanto) dengan masing-masing 2 anak (Total 10 anak).
+
+### 3. Posyandu Mawar 02 (RW 02, Buahbatu) — 10 Balita & 5 Orang Tua
+- 5 Keluarga (Bambang Pamungkas, Ade Kurniawan, Eko Yulianto, Surya Kencana, Gunawan Wibowo) dengan masing-masing 2 anak (Total 10 anak).
+
+---
+
+## 🔄 Aturan Input Penimbangan (Pencegahan Duplikasi NIK)
+
+Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
+1. **Jika NIK Sudah Terdaftar (Contoh: NIK `3201948392010001` - Muhammad Arfan)**:
+   - Sistem mendeteksi anak sudah ada di basis data.
+   - Sistem **TIDAK membuat data anak baru**, melainkan menambahkan hasil penimbangan terbaru ke riwayat anak yang bersangkutan.
+   - Nama anak di Portal Orang Tua dan Rekap Gizi **tetap 1 dan tidak pernah bertambah ganda/dobel**.
+2. **Jika NIK Baru (Belum Pernah Terdaftar)**:
+   - Sistem mendaftarkan balita sebagai data baru dan mengaitkannya ke orang tua sesuai nama orang tua yang dimasukkan.
+
+---
+
 # 🚀 LANGKAH PENGUJIAN 1 ALUR BERURUTAN (STEP-BY-STEP)
 
 ---
