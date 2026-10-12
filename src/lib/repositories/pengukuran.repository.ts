@@ -281,7 +281,6 @@ export const pengukuranRepository = {
       posisiUkur: pos,
       zBbu,
       zTbu,
-      zTbu: zTbu,
       zBbtb,
       statusGizi,
       tingkatRisiko,

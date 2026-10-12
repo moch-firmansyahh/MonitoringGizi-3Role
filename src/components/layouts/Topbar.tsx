@@ -38,6 +38,8 @@ export const Topbar: React.FC<TopbarProps> = ({
   const isOnline = useSyncExternalStore(subscribeOnline, getOnlineSnapshot, getServerOnlineSnapshot);
   const [pendingCount, setPendingCount] = useState(0);
   const [notifList, setNotifList] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
 
   useEffect(() => {
     let ignore = false;

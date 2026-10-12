@@ -91,6 +91,7 @@ export default function DetailAnakPage() {
 
                       const localMeasurement: Pengukuran = {
                         id: `local-meas-${Date.now()}`,
+                        clientUuid: crypto.randomUUID(),
                         idAnak: idAnak,
                         tanggalPeriksa: matchedLocal.tanggalPeriksa,
                         usiaBulan: matchedLocal.usiaBulan,

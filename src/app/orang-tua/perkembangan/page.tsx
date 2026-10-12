@@ -43,11 +43,12 @@ export default function OrangTuaPerkembanganPage() {
   // 2. Ambil data kurva untuk anak yang dipilih
   useEffect(() => {
     if (!selectedAnak) return;
+    const anakId = selectedAnak.id;
     let ignore = false;
     async function loadKurva() {
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/anak/${selectedAnak.id}/kurva`);
+        const res = await fetch(`/api/anak/${anakId}/kurva`);
         const json = await res.json();
         if (!ignore && res.ok && json.success) {
           setData(json.data);
