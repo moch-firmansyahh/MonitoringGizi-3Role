@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-type RoleOption = "posyandu" | "puskesmas" | "orang_tua";
+type RoleOption = "posyandu" | "puskesmas" | "orang_tua" | "dinkes";
 
 export const LoginForm: React.FC = () => {
   const router = useRouter();
@@ -112,7 +112,7 @@ export const LoginForm: React.FC = () => {
           </div>
 
           {/* Minimalist Segmented Role Tab (Clean Enterprise Style) */}
-          <div className="flex p-1 bg-[#f1f3f5] dark:bg-[#1e222d] rounded-xl mb-6 border border-gray-200/60 dark:border-zinc-800">
+          <div className="grid grid-cols-4 p-1 bg-[#f1f3f5] dark:bg-[#1e222d] rounded-xl mb-6 border border-gray-200/60 dark:border-zinc-800 gap-1">
             <button
               type="button"
               onClick={() => {
@@ -120,7 +120,7 @@ export const LoginForm: React.FC = () => {
                 if (usernameError) setUsernameError(null);
                 if (passwordError) setPasswordError(null);
               }}
-              className={`flex-1 py-2 text-[13px] font-medium rounded-lg transition-all cursor-pointer ${
+              className={`py-2 text-[12px] sm:text-[13px] font-medium rounded-lg transition-all cursor-pointer text-center truncate px-1 ${
                 selectedRole === "posyandu"
                   ? "bg-white dark:bg-[#161920] text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold"
                   : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
@@ -135,7 +135,7 @@ export const LoginForm: React.FC = () => {
                 if (usernameError) setUsernameError(null);
                 if (passwordError) setPasswordError(null);
               }}
-              className={`flex-1 py-2 text-[13px] font-medium rounded-lg transition-all cursor-pointer ${
+              className={`py-2 text-[12px] sm:text-[13px] font-medium rounded-lg transition-all cursor-pointer text-center truncate px-1 ${
                 selectedRole === "puskesmas"
                   ? "bg-white dark:bg-[#161920] text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold"
                   : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
@@ -150,13 +150,29 @@ export const LoginForm: React.FC = () => {
                 if (usernameError) setUsernameError(null);
                 if (passwordError) setPasswordError(null);
               }}
-              className={`flex-1 py-2 text-[13px] font-medium rounded-lg transition-all cursor-pointer ${
+              className={`py-2 text-[12px] sm:text-[13px] font-medium rounded-lg transition-all cursor-pointer text-center truncate px-1 ${
                 selectedRole === "orang_tua"
                   ? "bg-white dark:bg-[#161920] text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold"
                   : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
               }`}
             >
               Orang Tua
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRole("dinkes");
+                if (usernameError) setUsernameError(null);
+                if (passwordError) setPasswordError(null);
+              }}
+              className={`py-2 text-[12px] sm:text-[13px] font-medium rounded-lg transition-all cursor-pointer text-center truncate px-1 ${
+                selectedRole === "dinkes"
+                  ? "bg-white dark:bg-[#161920] text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold"
+                  : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
+              }`}
+            >
+              <span className="sm:hidden">Dinkes</span>
+              <span className="hidden sm:inline">Dinas Kesehatan</span>
             </button>
           </div>
 
@@ -174,6 +190,8 @@ export const LoginForm: React.FC = () => {
                   ? "Username Puskesmas"
                   : selectedRole === "orang_tua"
                   ? "Username Akun Orang Tua"
+                  : selectedRole === "dinkes"
+                  ? "Username Dinas Kesehatan"
                   : "Username"}
               </label>
               <input
@@ -192,6 +210,8 @@ export const LoginForm: React.FC = () => {
                     ? "Masukkan ID / username Puskesmas"
                     : selectedRole === "orang_tua"
                     ? "Masukkan ID / username Orang Tua"
+                    : selectedRole === "dinkes"
+                    ? "Masukkan ID / username Dinas Kesehatan (contoh: dinkes_bandung)"
                     : "Masukkan username Anda"
                 }
                 className={`w-full px-4 py-3 rounded-xl font-inter text-[15px] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none transition-all duration-150 ${
