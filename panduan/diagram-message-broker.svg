@@ -208,8 +208,8 @@
       <line x1="12" y1="28" x2="22" y2="28" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
     </g>
 
-    <text x="112" y="118" font-size="14.5" font-weight="bold" fill="#581c87" text-anchor="middle">Aplikasi Audit &amp; Dinkes</text>
-    <text x="112" y="136" font-size="12" fill="#6b21a8" text-anchor="middle">(Laporan &amp; Log Epidemiologi)</text>
+    <text x="112" y="118" font-size="14" font-weight="bold" fill="#581c87" text-anchor="middle">Layanan Audit &amp; Log Server</text>
+    <text x="112" y="136" font-size="11.5" fill="#6b21a8" text-anchor="middle">(Worker Daemon 'npm run worker')</text>
     <rect x="20" y="142" width="185" height="10" rx="4" fill="#e9d5ff"/>
   </g>
 
