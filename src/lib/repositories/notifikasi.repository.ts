@@ -3,45 +3,52 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 
 
-const INITIAL_NOTIFIKASI_SEED: Notifikasi[] = [
-  {
-    id: "n1",
-    idPenerima: "c0000000-0000-0000-0000-000000000003", // Orang Tua Arfan
-    jenis: "hasil_pengukuran",
-    judul: "Hasil Pemeriksaan Muhammad Arfan",
-    isi: "Pemeriksaan terbaru pada 12 Agustus 2026 telah dicatat. Ananda dianjurkan mengonsumsi gizi berprotein tinggi.",
-    tautan: "/orang-tua/perkembangan",
-    dibaca: false,
-    createdAt: "2026-08-12T10:00:00Z",
-  },
-  {
-    id: "n2",
-    idPenerima: "c0000000-0000-0000-0000-000000000003",
-    jenis: "jadwal_pengingat",
-    judul: "Pengingat Penimbangan Rutin",
-    isi: "Jadwal penimbangan balita berikutnya di Posyandu Melati 03 pada 12 September 2026.",
-    tautan: "/orang-tua/jadwal",
-    dibaca: true,
-    createdAt: "2026-08-10T08:00:00Z",
-  },
-  {
-    id: "n3",
-    idPenerima: "c0000000-0000-0000-0000-000000000002", // Puskesmas
-    jenis: "rujukan_baru",
-    judul: "Rujukan Masuk Baru: Muhammad Arfan",
-    isi: "Rujukan stunting masuk dari Posyandu Melati 03. Silakan tinjau dan tindak lanjuti.",
-    tautan: "/puskesmas/rujukan",
-    dibaca: false,
-    createdAt: "2026-08-12T09:15:00Z",
-  },
-];
+function createInitialNotifSeed(): Notifikasi[] {
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+  const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
+
+  return [
+    {
+      id: "n1",
+      idPenerima: "c0000000-0000-0000-0000-000000000003", // Orang Tua Arfan
+      jenis: "hasil_pengukuran",
+      judul: "Hasil Pemeriksaan Muhammad Arfan",
+      isi: "Pemeriksaan terbaru telah dicatat. Ananda dianjurkan mengonsumsi gizi berprotein hewani.",
+      tautan: "/orang-tua/perkembangan",
+      dibaca: false,
+      createdAt: nowIso,
+    },
+    {
+      id: "n2",
+      idPenerima: "c0000000-0000-0000-0000-000000000003",
+      jenis: "jadwal_pengingat",
+      judul: "Pengingat Penimbangan Rutin",
+      isi: "Jadwal penimbangan balita berkala Posyandu Melati 03 siap diikuti.",
+      tautan: "/orang-tua/jadwal",
+      dibaca: true,
+      createdAt: twoHoursAgo,
+    },
+    {
+      id: "n3",
+      idPenerima: "c0000000-0000-0000-0000-000000000002", // Puskesmas
+      jenis: "rujukan_baru",
+      judul: "Rujukan Masuk Baru: Muhammad Arfan",
+      isi: "Rujukan stunting masuk dari Posyandu Melati 03. Silakan tinjau dan tindak lanjuti.",
+      tautan: "/puskesmas/rujukan",
+      dibaca: false,
+      createdAt: oneHourAgo,
+    },
+  ];
+}
 
 const globalForNotif = globalThis as unknown as {
   __localNotifikasiStore?: Notifikasi[];
   __localNotifikasiStoreVersion?: number;
 };
 
-const CURRENT_NOTIF_VERSION = 3;
+const CURRENT_NOTIF_VERSION = 4;
 
 const getNotifStore = (): Notifikasi[] => {
   if (
@@ -49,7 +56,7 @@ const getNotifStore = (): Notifikasi[] => {
     globalForNotif.__localNotifikasiStore.length === 0 ||
     globalForNotif.__localNotifikasiStoreVersion !== CURRENT_NOTIF_VERSION
   ) {
-    globalForNotif.__localNotifikasiStore = [...INITIAL_NOTIFIKASI_SEED];
+    globalForNotif.__localNotifikasiStore = createInitialNotifSeed();
     globalForNotif.__localNotifikasiStoreVersion = CURRENT_NOTIF_VERSION;
   }
   return globalForNotif.__localNotifikasiStore;

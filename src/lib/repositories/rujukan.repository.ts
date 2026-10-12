@@ -2,86 +2,104 @@ import { Rujukan, CreateRujukanPayload, StatusRujukan, RujukanRiwayat } from "@/
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { anakRepository } from "./anak.repository";
 
-let localRujukanStore: Rujukan[] = [
-  {
-    id: "10000000-0000-0000-0000-000000000001",
-    idPengukuran: "e0000000-0000-0000-0000-000000000001",
-    idAnak: "d0000000-0000-0000-0000-000000000001",
-    idPosyandu: "a0000000-0000-0000-0000-000000000001",
-    idPuskesmas: "b0000000-0000-0000-0000-000000000001",
-    status: "diajukan",
-    catatan:
-      "Anak mengalami stunting kronis dengan TB/U -3.10 SD, nafsu makan menurun dalam 2 bulan terakhir. Mohon penanganan lanjutan ahli gizi faskes.",
-    dibuatOleh: "c0000000-0000-0000-0000-000000000001",
-    createdAt: "2026-08-12T09:00:00Z",
-    anak: {
-      id: "d0000000-0000-0000-0000-000000000001",
-      nik: "3201948392010001",
-      nama: "Muhammad Arfan",
-      tanggalLahir: "2024-04-12",
-      jenisKelamin: "L",
-      namaOrangTua: "Rahmat Hidayat",
-      alamat: "Jl. Sukabirus No. 14, RT 02/03",
+const globalForRujukan = globalThis as unknown as {
+  __localRujukanStore?: Rujukan[];
+};
+
+function createInitialRujukanSeed(): Rujukan[] {
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+
+  return [
+    {
+      id: "10000000-0000-0000-0000-000000000001",
+      idPengukuran: "e0000000-0000-0000-0000-000000000001",
+      idAnak: "d0000000-0000-0000-0000-000000000001",
       idPosyandu: "a0000000-0000-0000-0000-000000000001",
-    },
-    riwayat: [
-      {
-        id: "r1",
-        idRujukan: "10000000-0000-0000-0000-000000000001",
-        dariStatus: null,
-        keStatus: "diajukan",
-        oleh: "c0000000-0000-0000-0000-000000000001",
-        namaPelaku: "Bidan Sri Wahyuni, S.Tr.Keb",
-        catatan: "Pengajuan rujukan awal dari Posyandu Melati 03",
-        waktu: "2026-08-12T09:00:00Z",
+      idPuskesmas: "b0000000-0000-0000-0000-000000000001",
+      status: "diajukan",
+      catatan:
+        "Anak mengalami stunting kronis dengan TB/U -3.61 SD, nafsu makan menurun dalam 2 bulan terakhir. Mohon penanganan lanjutan ahli gizi faskes.",
+      dibuatOleh: "c0000000-0000-0000-0000-000000000001",
+      createdAt: nowIso,
+      anak: {
+        id: "d0000000-0000-0000-0000-000000000001",
+        nik: "3201948392010001",
+        nama: "Muhammad Arfan",
+        tanggalLahir: "2024-04-12",
+        jenisKelamin: "L",
+        namaOrangTua: "Rahmat Hidayat",
+        alamat: "Jl. Sukabirus No. 14, RT 02/03",
+        idPosyandu: "a0000000-0000-0000-0000-000000000001",
       },
-    ],
-  },
-  {
-    id: "10000000-0000-0000-0000-000000000002",
-    idPengukuran: "e0000000-0000-0000-0000-000000000005",
-    idAnak: "d0000000-0000-0000-0000-000000000005",
-    idPosyandu: "a0000000-0000-0000-0000-000000000001",
-    idPuskesmas: "b0000000-0000-0000-0000-000000000001",
-    status: "diterima",
-    catatan:
-      "Indikasi Gizi Buruk Severely Wasted (-3.20 SD). Diterima oleh Puskesmas untuk evaluasi formula F-75/F-100.",
-    dibuatOleh: "c0000000-0000-0000-0000-000000000001",
-    createdAt: "2026-08-05T09:00:00Z",
-    anak: {
-      id: "d0000000-0000-0000-0000-000000000005",
-      nik: "3201948392010005",
-      nama: "Rafi Ahmad Fauzi",
-      tanggalLahir: "2023-04-05",
-      jenisKelamin: "L",
-      namaOrangTua: "Agus Setiawan",
-      alamat: "Jl. Sukabirus Gang Melati 1",
+      riwayat: [
+        {
+          id: "r1",
+          idRujukan: "10000000-0000-0000-0000-000000000001",
+          dariStatus: null,
+          keStatus: "diajukan",
+          oleh: "c0000000-0000-0000-0000-000000000001",
+          namaPelaku: "Bidan Sri Wahyuni, S.Tr.Keb",
+          catatan: "Pengajuan rujukan awal dari Posyandu Melati 03",
+          waktu: nowIso,
+        },
+      ],
+    },
+    {
+      id: "10000000-0000-0000-0000-000000000002",
+      idPengukuran: "e0000000-0000-0000-0000-000000000005",
+      idAnak: "d0000000-0000-0000-0000-000000000005",
       idPosyandu: "a0000000-0000-0000-0000-000000000001",
+      idPuskesmas: "b0000000-0000-0000-0000-000000000001",
+      status: "diterima",
+      catatan:
+        "Indikasi Gizi Buruk Severely Wasted (-3.20 SD). Diterima oleh Puskesmas untuk evaluasi formula F-75/F-100.",
+      dibuatOleh: "c0000000-0000-0000-0000-000000000001",
+      createdAt: twoHoursAgo,
+      anak: {
+        id: "d0000000-0000-0000-0000-000000000005",
+        nik: "3201948392010005",
+        nama: "Rafi Ahmad Fauzi",
+        tanggalLahir: "2023-04-05",
+        jenisKelamin: "L",
+        namaOrangTua: "Agus Setiawan",
+        alamat: "Jl. Sukabirus Gang Melati 1",
+        idPosyandu: "a0000000-0000-0000-0000-000000000001",
+      },
+      riwayat: [
+        {
+          id: "r2",
+          idRujukan: "10000000-0000-0000-0000-000000000002",
+          dariStatus: null,
+          keStatus: "diajukan",
+          oleh: "c0000000-0000-0000-0000-000000000001",
+          namaPelaku: "Bidan Sri Wahyuni, S.Tr.Keb",
+          catatan: "Pengajuan rujukan gizi buruk dari Posyandu Melati 03",
+          waktu: twoHoursAgo,
+        },
+        {
+          id: "r3",
+          idRujukan: "10000000-0000-0000-0000-000000000002",
+          dariStatus: "diajukan",
+          keStatus: "diterima",
+          oleh: "c0000000-0000-0000-0000-000000000002",
+          namaPelaku: "Dr. Hj. Syahla Mutiara Latifah, M.Kes",
+          catatan: "Rujukan diterima untuk konsultasi poli gizi balita",
+          waktu: oneHourAgo,
+        },
+      ],
     },
-    riwayat: [
-      {
-        id: "r2",
-        idRujukan: "10000000-0000-0000-0000-000000000002",
-        dariStatus: null,
-        keStatus: "diajukan",
-        oleh: "c0000000-0000-0000-0000-000000000001",
-        namaPelaku: "Bidan Sri Wahyuni, S.Tr.Keb",
-        catatan: "Pengajuan rujukan gizi buruk dari Posyandu Melati 03",
-        waktu: "2026-08-05T09:00:00Z",
-      },
-      {
-        id: "r3",
-        idRujukan: "10000000-0000-0000-0000-000000000002",
-        dariStatus: "diajukan",
-        keStatus: "diterima",
-        oleh: "c0000000-0000-0000-0000-000000000002",
-        namaPelaku: "Dr. Hj. Syahla Mutiara Latifah, M.Kes",
-        catatan: "Rujukan diterima untuk konsultasi poli gizi balita",
-        waktu: "2026-08-05T10:30:00Z",
-      },
-    ],
-  },
-];
+  ];
+}
+
+function getRujukanStore(): Rujukan[] {
+  if (!globalForRujukan.__localRujukanStore) {
+    globalForRujukan.__localRujukanStore = createInitialRujukanSeed();
+  }
+  return globalForRujukan.__localRujukanStore;
+}
 
 export const rujukanRepository = {
   async getAll(options?: {
@@ -137,7 +155,8 @@ export const rujukanRepository = {
       }
     }
 
-    let result = [...localRujukanStore];
+    const store = getRujukanStore();
+    let result = [...store];
     if (options?.posyanduId) {
       result = result.filter((r) => r.idPosyandu === options.posyanduId);
     }
@@ -172,18 +191,40 @@ export const rujukanRepository = {
     return enriched;
   },
 
+  async getById(id: string): Promise<Rujukan | null> {
+    const list = await this.getAll();
+    return list.find((r) => r.id === id) || null;
+  },
+
   async create(data: CreateRujukanPayload, userId: string, idPosyandu?: string): Promise<Rujukan> {
+    const store = getRujukanStore();
     const anak = await anakRepository.getById(data.idAnak);
+    const nowIso = new Date().toISOString();
 
     // Hindari duplikasi rujukan yang sama untuk anak yang sedang diajukan
-    const existing = localRujukanStore.find(
+    const existing = store.find(
       (r) => r.idAnak === data.idAnak && (r.status === "diajukan" || r.status === "diterima"),
     );
     if (existing) {
       existing.catatan = data.catatan;
       existing.idPengukuran = data.idPengukuran;
       existing.status = "diajukan";
+      existing.createdAt = nowIso;
       if (!existing.anak && anak) existing.anak = anak;
+
+      // Realtime update timeline
+      existing.riwayat = [
+        {
+          id: crypto.randomUUID(),
+          idRujukan: existing.id,
+          dariStatus: null,
+          keStatus: "diajukan",
+          oleh: userId,
+          namaPelaku: "Bidan Sri Wahyuni, S.Tr.Keb",
+          catatan: data.catatan || "Pengajuan rujukan faskes (penimbangan terbaru)",
+          waktu: nowIso,
+        },
+      ];
       return existing;
     }
 
@@ -196,7 +237,7 @@ export const rujukanRepository = {
       status: "diajukan",
       catatan: data.catatan,
       dibuatOleh: userId,
-      createdAt: new Date().toISOString(),
+      createdAt: nowIso,
       anak: anak || undefined,
       riwayat: [
         {
@@ -205,15 +246,15 @@ export const rujukanRepository = {
           dariStatus: null,
           keStatus: "diajukan",
           oleh: userId,
-          namaPelaku: "Kader Posyandu",
-          catatan: "Pengajuan rujukan faskes",
-          waktu: new Date().toISOString(),
+          namaPelaku: "Bidan Sri Wahyuni, S.Tr.Keb",
+          catatan: data.catatan || "Pengajuan rujukan faskes",
+          waktu: nowIso,
         },
       ],
     };
     newRujukan.riwayat![0].idRujukan = newRujukan.id;
 
-    localRujukanStore.unshift(newRujukan);
+    store.unshift(newRujukan);
     return newRujukan;
   },
 
@@ -224,10 +265,12 @@ export const rujukanRepository = {
     userId?: string,
     namaPelaku?: string,
   ): Promise<Rujukan | null> {
-    const item = localRujukanStore.find((r) => r.id === id);
+    const store = getRujukanStore();
+    const item = store.find((r) => r.id === id);
     if (!item) return null;
 
     const prevStatus = item.status;
+    const nowIso = new Date().toISOString();
     item.status = newStatus;
     item.diperbaruiOleh = userId || null;
     if (note) {
@@ -241,14 +284,18 @@ export const rujukanRepository = {
       dariStatus: prevStatus,
       keStatus: newStatus,
       oleh: userId || null,
-      namaPelaku: namaPelaku || "Petugas Faskes",
+      namaPelaku: namaPelaku || (newStatus === "ditolak" ? "Dokter Puskesmas" : "Dr. Hj. Syahla Mutiara Latifah, M.Kes"),
       catatan: note || `Status diubah menjadi ${newStatus}`,
-      waktu: new Date().toISOString(),
+      waktu: nowIso,
     };
 
     if (!item.riwayat) item.riwayat = [];
     item.riwayat.push(riwayatItem);
 
     return item;
+  },
+
+  async reset(): Promise<void> {
+    globalForRujukan.__localRujukanStore = createInitialRujukanSeed();
   },
 };

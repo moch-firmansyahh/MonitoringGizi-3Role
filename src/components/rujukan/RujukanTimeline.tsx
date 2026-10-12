@@ -8,6 +8,43 @@ interface RujukanTimelineProps {
   riwayat: RujukanRiwayat[];
 }
 
+function formatTimelineDate(dateStr: string): string {
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMinutes = Math.floor(diffMs / 60000);
+
+    const timeFormatted = date.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    if (diffMinutes >= 0 && diffMinutes < 3) {
+      return `Baru saja (${timeFormatted})`;
+    }
+
+    const isToday =
+      date.getDate() === now.getDate() &&
+      date.getMonth() === now.getMonth() &&
+      date.getFullYear() === now.getFullYear();
+
+    if (isToday) {
+      return `Hari ini, ${timeFormatted}`;
+    }
+
+    return date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
 export const RujukanTimeline: React.FC<RujukanTimelineProps> = ({ riwayat }) => {
   if (!riwayat || riwayat.length === 0) {
     return (
@@ -46,14 +83,8 @@ export const RujukanTimeline: React.FC<RujukanTimelineProps> = ({ riwayat }) => 
               <span className="font-inter text-[13px] font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wide">
                 {r.keStatus}
               </span>
-              <span className="text-[11.5px] text-zinc-400">
-                {new Date(r.waktu).toLocaleDateString("id-ID", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+              <span className="text-[11.5px] text-zinc-400 font-medium">
+                {formatTimelineDate(r.waktu)}
               </span>
             </div>
 

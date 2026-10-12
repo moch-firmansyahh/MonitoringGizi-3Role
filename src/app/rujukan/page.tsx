@@ -143,11 +143,15 @@ export default function RujukanPosyanduPage() {
                         <div className="mt-3 pt-2.5 border-t border-gray-100 dark:border-zinc-800/80 flex items-center justify-between text-[11.5px] text-zinc-400">
                           <span>
                             Dibuat:{" "}
-                            {new Date(r.createdAt || "").toLocaleDateString("id-ID", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })}
+                            {r.createdAt
+                              ? new Date(r.createdAt).toLocaleDateString("id-ID", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "Hari ini"}
                           </span>
                           <span className="font-medium text-[#0d472c] dark:text-emerald-400">
                             Lihat Timeline &rarr;
