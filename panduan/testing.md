@@ -403,8 +403,7 @@ Pengujian dilakukan dalam satu lintasan alur berurutan yang mencakup 4 tahap:
      - Status Pengiriman: Badge hijau **Tersinkronisasi**.
    - **Inspeksi Rincian Informasi**:
      - Klik tombol **"Lihat Detail"** pada baris aktivitas.
-     - Tab **"Ringkasan Informasi"**: Menampilkan rincian manusiawi yang rapi (nama balita, posyandu/puskesmas, diagnosis dokter, resep bantuan PMT).
-     - Tab **"Format Teknis (JSON)"**: Tersedia opsi melihat data teknis mentah AMQP/RabbitMQ beserta tombol **"Salin Data JSON"**.
+     - Menampilkan kartu rincian yang rapi dan mudah dipahami: data balita, instansi/faskes pengirim, waktu pemeriksaan lengkap, hasil pengukuran (BB, TB, Z-Score), serta catatan/tindakan dokter dan resep bantuan PMT.
 
 ---
 

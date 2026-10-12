@@ -8,17 +8,10 @@ import {
   Search,
   CheckCircle2,
   RefreshCw,
-  Code2,
   X,
   Server,
   Layers,
-  Clock,
   Eye,
-  FileText,
-  Copy,
-  Check,
-  Building2,
-  User,
   ShieldCheck,
 } from "lucide-react";
 
@@ -31,8 +24,6 @@ export default function DinkesAuditLogPage() {
   const [filterType, setFilterType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLog, setSelectedLog] = useState<any | null>(null);
-  const [activeModalTab, setActiveModalTab] = useState<"ringkasan" | "teknis">("ringkasan");
-  const [isCopied, setIsCopied] = useState(false);
 
   const handleRefresh = async () => {
     try {
@@ -83,13 +74,6 @@ export default function DinkesAuditLogPage() {
       clearInterval(timer);
     };
   }, [filterType, searchQuery]);
-
-  const handleCopyJson = () => {
-    if (!selectedLog) return;
-    navigator.clipboard.writeText(JSON.stringify(selectedLog, null, 2));
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
-  };
 
   const getEventBadge = (type: string) => {
     switch (type) {
@@ -364,10 +348,7 @@ export default function DinkesAuditLogPage() {
                           <td className="px-4 py-3 text-right whitespace-nowrap">
                             <button
                               type="button"
-                              onClick={() => {
-                                setSelectedLog(log);
-                                setActiveModalTab("ringkasan");
-                              }}
+                              onClick={() => setSelectedLog(log)}
                               className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-zinc-700 hover:bg-[#eef3ed] dark:hover:bg-[#1b2720] hover:text-[#0d472c] dark:hover:text-emerald-300 text-[12px] font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5 ml-auto cursor-pointer transition-colors"
                             >
                               <Eye className="w-3.5 h-3.5" />
@@ -406,8 +387,8 @@ export default function DinkesAuditLogPage() {
                 <h3 className="font-bold text-[18px] text-zinc-900 dark:text-zinc-100 mt-1">
                   Rincian Informasi Aktivitas
                 </h3>
-                <p className="text-[12px] text-zinc-400 font-mono mt-0.5">
-                  ID Referensi: {selectedLog.eventId}
+                <p className="text-[12px] text-zinc-400 mt-0.5">
+                  No. Referensi: <span className="font-semibold text-zinc-600 dark:text-zinc-300">{formatShortRef(selectedLog.eventId)}</span>
                 </p>
               </div>
 
@@ -420,192 +401,133 @@ export default function DinkesAuditLogPage() {
               </button>
             </div>
 
-            {/* Tab Nav (Ringkasan vs Format Teknis) */}
-            <div className="flex items-center gap-2 border-b border-gray-100 dark:border-zinc-800 pb-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => setActiveModalTab("ringkasan")}
-                className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  activeModalTab === "ringkasan"
-                    ? "bg-[#0d472c] text-white"
-                    : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span>Ringkasan Informasi</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveModalTab("teknis")}
-                className={`px-3 py-1.5 rounded-lg text-[12.5px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  activeModalTab === "teknis"
-                    ? "bg-[#0d472c] text-white"
-                    : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
-                }`}
-              >
-                <Code2 className="w-3.5 h-3.5" />
-                <span>Format Teknis (JSON)</span>
-              </button>
-            </div>
+            {/* Modal Body - 100% Human-Readable Information Card */}
+            <div className="overflow-y-auto flex-1 pr-1 space-y-4 text-[13px]">
+              {/* Uraian Box */}
+              <div className="p-3.5 rounded-xl bg-gray-50 dark:bg-[#1e222d] border border-gray-100 dark:border-zinc-800">
+                <p className="text-[11.5px] font-medium text-zinc-400 mb-1">
+                  Uraian Catatan Aktivitas
+                </p>
+                <p className="text-zinc-800 dark:text-zinc-200 font-medium leading-relaxed">
+                  {selectedLog.ringkasan}
+                </p>
+              </div>
 
-            {/* Modal Body */}
-            <div className="overflow-y-auto flex-1 pr-1 space-y-4">
-              {activeModalTab === "ringkasan" ? (
-                <div className="space-y-4 text-[13px]">
-                  {/* Uraian Box */}
-                  <div className="p-3.5 rounded-xl bg-gray-50 dark:bg-[#1e222d] border border-gray-100 dark:border-zinc-800">
-                    <p className="text-[11.5px] font-medium text-zinc-400 mb-1">
-                      Uraian Catatan Aktivitas
-                    </p>
-                    <p className="text-zinc-800 dark:text-zinc-200 font-medium leading-relaxed">
-                      {selectedLog.ringkasan}
-                    </p>
-                  </div>
+              {/* 2-Col Grid Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-3 rounded-xl border border-gray-100 dark:border-zinc-800 space-y-1">
+                  <p className="text-[11px] text-zinc-400">Waktu Tercatat</p>
+                  <p className="font-semibold text-zinc-800 dark:text-zinc-200">
+                    {new Date(selectedLog.timestamp).toLocaleDateString("id-ID", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                  <p className="text-[12px] text-zinc-500">
+                    Pukul{" "}
+                    {new Date(selectedLog.timestamp).toLocaleTimeString("id-ID", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    })}{" "}
+                    WIB
+                  </p>
+                </div>
 
-                  {/* 2-Col Grid Info */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="p-3 rounded-xl border border-gray-100 dark:border-zinc-800 space-y-1">
-                      <p className="text-[11px] text-zinc-400">Waktu Tercatat</p>
-                      <p className="font-semibold text-zinc-800 dark:text-zinc-200">
-                        {new Date(selectedLog.timestamp).toLocaleDateString("id-ID", {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </p>
-                      <p className="text-[12px] text-zinc-500">
-                        Pukul{" "}
-                        {new Date(selectedLog.timestamp).toLocaleTimeString("id-ID", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                        })}{" "}
-                        WIB
-                      </p>
-                    </div>
+                <div className="p-3 rounded-xl border border-gray-100 dark:border-zinc-800 space-y-1">
+                  <p className="text-[11px] text-zinc-400">Instansi / Asal Pengirim</p>
+                  <p className="font-semibold text-zinc-800 dark:text-zinc-200 capitalize">
+                    {selectedLog.producer === "posyandu"
+                      ? "Kader Posyandu"
+                      : selectedLog.producer === "puskesmas"
+                      ? "Dokter Puskesmas"
+                      : selectedLog.producer}
+                  </p>
+                  <p className="text-[12px] text-zinc-500">
+                    {selectedLog.faskes || (selectedLog.producer === "posyandu" ? "Posyandu Binaan" : "Puskesmas Bojongsoang")}
+                  </p>
+                </div>
+              </div>
 
-                    <div className="p-3 rounded-xl border border-gray-100 dark:border-zinc-800 space-y-1">
-                      <p className="text-[11px] text-zinc-400">Instansi / Asal Pengirim</p>
-                      <p className="font-semibold text-zinc-800 dark:text-zinc-200 capitalize">
-                        {selectedLog.producer === "posyandu"
-                          ? "Kader Posyandu"
-                          : selectedLog.producer === "puskesmas"
-                          ? "Dokter Puskesmas"
-                          : selectedLog.producer}
-                      </p>
-                      <p className="text-[12px] text-zinc-500">
-                        {selectedLog.faskes || (selectedLog.producer === "posyandu" ? "Posyandu Binaan" : "Puskesmas Bojongsoang")}
+              {/* Informasi Balita & Detail Pengukuran / Rujukan */}
+              {selectedLog.namaAnak && (
+                <div className="p-3.5 rounded-xl border border-gray-100 dark:border-zinc-800 space-y-2">
+                  <p className="text-[11.5px] font-semibold text-zinc-400 uppercase tracking-wider">
+                    Data Pasien &amp; Pengukuran Terkait
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
+                    <div>
+                      <p className="text-[11px] text-zinc-400">Nama Balita</p>
+                      <p className="font-bold text-zinc-800 dark:text-zinc-200">
+                        {selectedLog.namaAnak}
                       </p>
                     </div>
-                  </div>
 
-                  {/* Informasi Balita & Detail Pengukuran / Rujukan */}
-                  {selectedLog.namaAnak && (
-                    <div className="p-3.5 rounded-xl border border-gray-100 dark:border-zinc-800 space-y-2">
-                      <p className="text-[11.5px] font-semibold text-zinc-400 uppercase tracking-wider">
-                        Data Pasien &amp; Pengukuran Terkait
-                      </p>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
-                        <div>
-                          <p className="text-[11px] text-zinc-400">Nama Balita</p>
-                          <p className="font-bold text-zinc-800 dark:text-zinc-200">
-                            {selectedLog.namaAnak}
-                          </p>
-                        </div>
-
-                        {selectedLog.data?.beratKg && (
-                          <div>
-                            <p className="text-[11px] text-zinc-400">Berat Badan</p>
-                            <p className="font-semibold text-zinc-800 dark:text-zinc-200">
-                              {selectedLog.data.beratKg} kg
-                            </p>
-                          </div>
-                        )}
-
-                        {selectedLog.data?.tinggiCm && (
-                          <div>
-                            <p className="text-[11px] text-zinc-400">Tinggi / Panjang</p>
-                            <p className="font-semibold text-zinc-800 dark:text-zinc-200">
-                              {selectedLog.data.tinggiCm} cm
-                            </p>
-                          </div>
-                        )}
-
-                        {selectedLog.data?.zTbu !== undefined && (
-                          <div>
-                            <p className="text-[11px] text-zinc-400">Nilai Z-Score TB/U</p>
-                            <p className="font-semibold text-rose-600 dark:text-rose-400">
-                              {selectedLog.data.zTbu} SD
-                            </p>
-                          </div>
-                        )}
-
-                        {selectedLog.status && (
-                          <div>
-                            <p className="text-[11px] text-zinc-400">Status Tindak Lanjut</p>
-                            <p className="font-semibold text-zinc-800 dark:text-zinc-200 capitalize">
-                              {selectedLog.status}
-                            </p>
-                          </div>
-                        )}
-
-                        {selectedLog.data?.namaDokter && (
-                          <div>
-                            <p className="text-[11px] text-zinc-400">Dokter Pemeriksa</p>
-                            <p className="font-semibold text-zinc-800 dark:text-zinc-200">
-                              {selectedLog.data.namaDokter}
-                            </p>
-                          </div>
-                        )}
+                    {selectedLog.data?.beratKg && (
+                      <div>
+                        <p className="text-[11px] text-zinc-400">Berat Badan</p>
+                        <p className="font-semibold text-zinc-800 dark:text-zinc-200">
+                          {selectedLog.data.beratKg} kg
+                        </p>
                       </div>
+                    )}
 
-                      {selectedLog.data?.diagnosis && (
-                        <div className="pt-2 border-t border-gray-100 dark:border-zinc-800/80">
-                          <p className="text-[11px] text-zinc-400">Diagnosis Dokter:</p>
-                          <p className="font-medium text-zinc-700 dark:text-zinc-300">
-                            {selectedLog.data.diagnosis}
-                          </p>
-                        </div>
-                      )}
+                    {selectedLog.data?.tinggiCm && (
+                      <div>
+                        <p className="text-[11px] text-zinc-400">Tinggi / Panjang</p>
+                        <p className="font-semibold text-zinc-800 dark:text-zinc-200">
+                          {selectedLog.data.tinggiCm} cm
+                        </p>
+                      </div>
+                    )}
 
-                      {(selectedLog.data?.tindakan || selectedLog.data?.resepPmt) && (
-                        <div className="pt-1.5">
-                          <p className="text-[11px] text-zinc-400">Tindakan / Resep Bantuan PMT:</p>
-                          <p className="font-medium text-zinc-700 dark:text-zinc-300">
-                            {selectedLog.data.tindakan || selectedLog.data.resepPmt}
-                          </p>
-                        </div>
-                      )}
+                    {selectedLog.data?.zTbu !== undefined && (
+                      <div>
+                        <p className="text-[11px] text-zinc-400">Nilai Z-Score TB/U</p>
+                        <p className="font-semibold text-rose-600 dark:text-rose-400">
+                          {selectedLog.data.zTbu} SD
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedLog.status && (
+                      <div>
+                        <p className="text-[11px] text-zinc-400">Status Tindak Lanjut</p>
+                        <p className="font-semibold text-zinc-800 dark:text-zinc-200 capitalize">
+                          {selectedLog.status}
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedLog.data?.namaDokter && (
+                      <div>
+                        <p className="text-[11px] text-zinc-400">Dokter Pemeriksa</p>
+                        <p className="font-semibold text-zinc-800 dark:text-zinc-200">
+                          {selectedLog.data.namaDokter}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {selectedLog.data?.diagnosis && (
+                    <div className="pt-2 border-t border-gray-100 dark:border-zinc-800/80">
+                      <p className="text-[11px] text-zinc-400">Diagnosis Dokter:</p>
+                      <p className="font-medium text-zinc-700 dark:text-zinc-300">
+                        {selectedLog.data.diagnosis}
+                      </p>
                     </div>
                   )}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-[11.5px] text-zinc-400">
-                    <span>Format data mentah untuk kebutuhan teknis &amp; pengembang:</span>
-                    <button
-                      type="button"
-                      onClick={handleCopyJson}
-                      className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline font-medium cursor-pointer"
-                    >
-                      {isCopied ? (
-                        <>
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Berhasil Disalin!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>Salin Data JSON</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
 
-                  <div className="bg-zinc-950 text-emerald-400 rounded-xl p-4 font-mono text-[11.5px] overflow-x-auto max-h-[360px] leading-relaxed border border-zinc-800">
-                    <pre>{JSON.stringify(selectedLog, null, 2)}</pre>
-                  </div>
+                  {(selectedLog.data?.tindakan || selectedLog.data?.resepPmt) && (
+                    <div className="pt-1.5">
+                      <p className="text-[11px] text-zinc-400">Tindakan / Resep Bantuan PMT:</p>
+                      <p className="font-medium text-zinc-700 dark:text-zinc-300">
+                        {selectedLog.data.tindakan || selectedLog.data.resepPmt}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -615,7 +537,7 @@ export default function DinkesAuditLogPage() {
               <button
                 type="button"
                 onClick={() => setSelectedLog(null)}
-                className="px-5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 text-white font-medium text-[13px] transition-colors cursor-pointer"
+                className="px-6 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 text-white font-medium text-[13px] transition-colors cursor-pointer"
               >
                 Tutup
               </button>
