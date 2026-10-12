@@ -29,6 +29,26 @@ function getServerOnlineSnapshot() {
   return true;
 }
 
+function formatRelativeTime(timestamp?: string) {
+  if (!timestamp) return "Hari ini";
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+  if (diffMinutes < 1) return "Baru saja";
+  if (diffMinutes < 60) return `${diffMinutes} menit yang lalu`;
+  const isToday = date.toDateString() === now.toDateString();
+  const timeStr = date.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  if (isToday) return `Hari ini, ${timeStr} WIB`;
+  return `${date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })}, ${timeStr} WIB`;
+}
+
 export const Topbar: React.FC<TopbarProps> = ({
   onOpenMobileMenu,
   userName,
@@ -215,14 +235,8 @@ export const Topbar: React.FC<TopbarProps> = ({
                           <p className="text-[12.5px] text-zinc-700 dark:text-zinc-300 leading-snug">
                             {n.isi}
                           </p>
-                          <span className="text-[11px] text-zinc-400 block pt-0.5">
-                            {n.createdAt
-                              ? new Date(n.createdAt).toLocaleDateString("id-ID", {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                })
-                              : "Hari ini"}
+                          <span className="text-[11px] text-zinc-400 block pt-0.5 font-medium">
+                            {formatRelativeTime(n.createdAt)}
                           </span>
                         </div>
                       );

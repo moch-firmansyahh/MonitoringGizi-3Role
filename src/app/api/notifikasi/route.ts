@@ -5,9 +5,16 @@ import { notifikasiRepository } from "@/lib/repositories/notifikasi.repository";
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    // Jika user role orang_tua atau username orangtua_arfan
-    const isOrangTua = user?.role === "orang_tua" || user?.username?.includes("orangtua");
-    const userId = isOrangTua ? "c0000000-0000-0000-0000-000000000003" : user?.id || "c0000000-0000-0000-0000-000000000003";
+    let userId = user?.id || "c0000000-0000-0000-0000-000000000003";
+    if (user?.username === "orangtua_arfan") {
+      userId = "c0000000-0000-0000-0000-000000000003";
+    } else if (user?.username === "orangtua_aisyah") {
+      userId = "c0000000-0000-0000-0000-000000000006";
+    } else if (user?.username === "orangtua_dafa") {
+      userId = "c0000000-0000-0000-0000-000000000008";
+    } else if (user?.username === "orangtua_kenzo") {
+      userId = "c0000000-0000-0000-0000-000000000009";
+    }
 
     const notifikasiList = await notifikasiRepository.getByUserId(userId);
     const unreadCount = notifikasiList.filter((n) => !n.dibaca).length;

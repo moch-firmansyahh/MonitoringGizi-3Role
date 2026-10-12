@@ -10,6 +10,7 @@ import {
   RujukanEventData,
 } from "./events";
 import { auditRepository } from "@/lib/repositories/audit.repository";
+import { notifikasiRepository } from "@/lib/repositories/notifikasi.repository";
 
 /**
  * Consumer 1: Puskesmas Triage Service
@@ -76,6 +77,13 @@ async function startConsumerOrangTua(channel: Channel) {
           console.log(
             `  -> [Pesan Orang Tua] Notifikasi pertumbuhan dikirim untuk ${ukur.namaAnak}: BB ${ukur.beratKg} kg, TB ${ukur.tinggiCm} cm (${ukur.statusGizi})`,
           );
+          await notifikasiRepository.create({
+            idPenerima: "c0000000-0000-0000-0000-000000000003",
+            jenis: "hasil_pengukuran",
+            judul: `Hasil Pemeriksaan ${ukur.namaAnak}`,
+            isi: `Pemeriksaan penimbangan baru berhasil dicatat: BB ${ukur.beratKg} kg, TB ${ukur.tinggiCm} cm (Status: ${ukur.statusGizi.toUpperCase()}). Ananda dianjurkan mengonsumsi gizi seimbang.`,
+            tautan: "/orang-tua/perkembangan",
+          }).catch(() => {});
         } else if (
           payload.eventType === "rujukan.created" ||
           payload.eventType === "rujukan.updated"
@@ -84,6 +92,19 @@ async function startConsumerOrangTua(channel: Channel) {
           console.log(
             `  -> [Pesan Orang Tua] Status rujukan ${rujukan.namaAnak} diperbarui menjadi: ${rujukan.status.toUpperCase()}`,
           );
+          const isDitindaklanjuti = rujukan.status === "ditindaklanjuti";
+          await notifikasiRepository.create({
+            idPenerima: "c0000000-0000-0000-0000-000000000003",
+            jenis: "rujukan_status",
+            judul: isDitindaklanjuti
+              ? `Rujukan Ditindaklanjuti Dokter Puskesmas: ${rujukan.namaAnak}`
+              : `Status Rujukan ${rujukan.namaAnak}: ${rujukan.status.toUpperCase()}`,
+            isi:
+              rujukan.catatanTindakan ||
+              rujukan.catatan ||
+              `Status rujukan balita telah diperbarui menjadi ${rujukan.status.toUpperCase()}.`,
+            tautan: "/orang-tua/notifikasi",
+          }).catch(() => {});
         }
 
         channel.ack(msg);

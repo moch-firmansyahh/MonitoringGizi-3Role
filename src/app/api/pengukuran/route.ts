@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { pengukuranRepository } from "@/lib/repositories/pengukuran.repository";
 import { createPengukuranSchema } from "@/lib/validation/schemas";
+import { notifikasiRepository } from "@/lib/repositories/notifikasi.repository";
 import { publishBrokerEvent } from "@/lib/broker/rabbitmq";
 import { BROKER_ROUTING_KEYS } from "@/lib/broker/events";
 
@@ -107,6 +108,26 @@ export async function POST(request: NextRequest) {
       },
       "posyandu",
     ).catch((err) => console.warn("[Message Broker] Publish pengukuran error:", err));
+
+    // Buat notifikasi real-time ke akun Orang Tua balita
+    const parentId =
+      result.anak?.namaOrangTua?.toLowerCase().includes("rahmat")
+        ? "c0000000-0000-0000-0000-000000000003"
+        : result.anak?.namaOrangTua?.toLowerCase().includes("hendra")
+        ? "c0000000-0000-0000-0000-000000000006"
+        : result.anak?.namaOrangTua?.toLowerCase().includes("ibrahim")
+        ? "c0000000-0000-0000-0000-000000000008"
+        : result.anak?.namaOrangTua?.toLowerCase().includes("ferry")
+        ? "c0000000-0000-0000-0000-000000000009"
+        : "c0000000-0000-0000-0000-000000000003";
+
+    await notifikasiRepository.create({
+      idPenerima: parentId,
+      jenis: "hasil_pengukuran",
+      judul: `Hasil Pemeriksaan ${result.anak?.nama || "Muhammad Arfan"}`,
+      isi: `Pemeriksaan penimbangan baru berhasil dicatat: BB ${result.beratKg} kg, TB ${result.tinggiCm} cm (Status: ${result.statusGizi.toUpperCase()}). Ananda dianjurkan mengonsumsi gizi seimbang dan mematuhi arahan kader.`,
+      tautan: "/orang-tua/perkembangan",
+    }).catch(() => {});
 
     return NextResponse.json(
       {

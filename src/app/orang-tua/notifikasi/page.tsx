@@ -56,6 +56,26 @@ export default function OrangTuaNotifikasiPage() {
     } catch {}
   };
 
+  const formatNotifTime = (timestamp?: string) => {
+    if (!timestamp) return "Hari ini";
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    if (diffMinutes < 1) return "Baru saja";
+    if (diffMinutes < 60) return `${diffMinutes} menit yang lalu`;
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    if (isToday) return `Hari ini, ${timeStr} WIB`;
+    return `${date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })}, ${timeStr} WIB`;
+  };
+
   return (
     <div className="flex flex-col space-y-4 w-full">
       {/* Header */}
@@ -134,16 +154,8 @@ export default function OrangTuaNotifikasiPage() {
                       <p className="font-inter text-[13px] text-zinc-600 dark:text-zinc-300 mt-1 leading-relaxed">
                         {n.isi}
                       </p>
-                      <span className="text-[11.5px] text-zinc-400 mt-2 block">
-                        {n.createdAt
-                          ? new Date(n.createdAt).toLocaleDateString("id-ID", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })
-                          : n.waktu || "Hari ini"}
+                      <span className="text-[11.5px] text-zinc-400 mt-2 block font-medium">
+                        {formatNotifTime(n.createdAt)}
                       </span>
                     </div>
                   </div>

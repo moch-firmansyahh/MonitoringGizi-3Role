@@ -1,13 +1,11 @@
 import { Notifikasi, JenisNotifikasi } from "@/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-
-
 function createInitialNotifSeed(): Notifikasi[] {
   const now = new Date();
-  const nowIso = now.toISOString();
-  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
-  const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
+  const m15 = new Date(now.getTime() - 15 * 60 * 1000).toISOString();
+  const h1 = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+  const h2 = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
 
   return [
     {
@@ -15,10 +13,10 @@ function createInitialNotifSeed(): Notifikasi[] {
       idPenerima: "c0000000-0000-0000-0000-000000000003", // Orang Tua Arfan
       jenis: "hasil_pengukuran",
       judul: "Hasil Pemeriksaan Muhammad Arfan",
-      isi: "Pemeriksaan terbaru telah dicatat. Ananda dianjurkan mengonsumsi gizi berprotein hewani.",
+      isi: "Pemeriksaan terbaru telah dicatat (BB: 10.1 kg, TB: 78.5 cm, Status: Stunting). Ananda dianjurkan mengonsumsi gizi berprotein hewani dan mematuhi rujukan faskes.",
       tautan: "/orang-tua/perkembangan",
       dibaca: false,
-      createdAt: nowIso,
+      createdAt: m15,
     },
     {
       id: "n2",
@@ -28,7 +26,7 @@ function createInitialNotifSeed(): Notifikasi[] {
       isi: "Jadwal penimbangan balita berkala Posyandu Melati 03 siap diikuti.",
       tautan: "/orang-tua/jadwal",
       dibaca: true,
-      createdAt: twoHoursAgo,
+      createdAt: h2,
     },
     {
       id: "n3",
@@ -38,7 +36,7 @@ function createInitialNotifSeed(): Notifikasi[] {
       isi: "Rujukan stunting masuk dari Posyandu Melati 03. Silakan tinjau dan tindak lanjuti.",
       tautan: "/puskesmas/rujukan",
       dibaca: false,
-      createdAt: oneHourAgo,
+      createdAt: h1,
     },
   ];
 }
@@ -48,7 +46,7 @@ const globalForNotif = globalThis as unknown as {
   __localNotifikasiStoreVersion?: number;
 };
 
-const CURRENT_NOTIF_VERSION = 4;
+const CURRENT_NOTIF_VERSION = 6;
 
 const getNotifStore = (): Notifikasi[] => {
   if (
@@ -64,6 +62,13 @@ const getNotifStore = (): Notifikasi[] => {
 
 export const notifikasiRepository = {
   async getByUserId(userId: string): Promise<Notifikasi[]> {
+    const inMemory = getNotifStore().filter((n) => n.idPenerima === userId);
+    const combinedMap = new Map<string, Notifikasi>();
+
+    for (const item of inMemory) {
+      combinedMap.set(item.id, item);
+    }
+
     const supabase = await createServerSupabaseClient();
     if (supabase) {
       try {
@@ -72,26 +77,37 @@ export const notifikasiRepository = {
           .select("*")
           .eq("id_penerima", userId)
           .order("created_at", { ascending: false });
-        if (!error && data && data.length > 0) {
-          return data.map((item) => ({
-            id: item.id,
-            idPenerima: item.id_penerima,
-            jenis: item.jenis,
-            judul: item.judul,
-            isi: item.isi,
-            tautan: item.tautan,
-            dibaca: item.dibaca,
-            createdAt: item.created_at,
-          }));
+        if (!error && data) {
+          for (const raw of data) {
+            let isi = raw.isi;
+            let createdAt = raw.created_at;
+            // Jika ada teks template lama Agustus 2026, ubah menjadi teks dinamis real-time
+            if (isi?.includes("12 Agustus 2026")) {
+              isi = isi.replace("pada 12 Agustus 2026", "terkini");
+              createdAt = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+            }
+            if (!combinedMap.has(raw.id)) {
+              combinedMap.set(raw.id, {
+                id: raw.id,
+                idPenerima: raw.id_penerima,
+                jenis: raw.jenis,
+                judul: raw.judul,
+                isi: isi,
+                tautan: raw.tautan,
+                dibaca: raw.dibaca,
+                createdAt: createdAt,
+              });
+            }
+          }
         }
       } catch (err) {
         console.warn("Gagal get notifikasi dari Supabase:", err);
       }
     }
 
-    return getNotifStore()
-      .filter((n) => n.idPenerima === userId)
-      .sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1));
+    return Array.from(combinedMap.values()).sort((a, b) =>
+      a.createdAt > b.createdAt ? -1 : 1,
+    );
   },
 
   async markAsRead(id: string): Promise<boolean> {
@@ -112,6 +128,18 @@ export const notifikasiRepository = {
   async markAllAsRead(userId: string): Promise<boolean> {
     for (const n of getNotifStore()) {
       if (n.idPenerima === userId) n.dibaca = true;
+    }
+
+    const supabase = await createServerSupabaseClient();
+    if (supabase) {
+      try {
+        await supabase
+          .from("notifikasi")
+          .update({ dibaca: true })
+          .eq("id_penerima", userId);
+      } catch (err) {
+        console.warn("Gagal mark all read di Supabase:", err);
+      }
     }
     return true;
   },
@@ -135,6 +163,27 @@ export const notifikasiRepository = {
     };
 
     getNotifStore().unshift(newNotif);
+
+    const supabase = await createServerSupabaseClient();
+    if (supabase) {
+      try {
+        await supabase.from("notifikasi").insert({
+          id: newNotif.id,
+          id_penerima: newNotif.idPenerima,
+          jenis: newNotif.jenis,
+          judul: newNotif.judul,
+          isi: newNotif.isi,
+          tautan: newNotif.tautan,
+          dibaca: false,
+          created_at: newNotif.createdAt,
+        });
+      } catch {}
+    }
+
     return newNotif;
+  },
+
+  async reset(): Promise<void> {
+    globalForNotif.__localNotifikasiStore = createInitialNotifSeed();
   },
 };

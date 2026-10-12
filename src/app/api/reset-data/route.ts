@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { dataAnak } from "@/lib/data-anak";
 import { auditRepository } from "@/lib/repositories/audit.repository";
 import { rujukanRepository } from "@/lib/repositories/rujukan.repository";
+import { notifikasiRepository } from "@/lib/repositories/notifikasi.repository";
 
 export async function GET() {
   try {
@@ -20,6 +21,7 @@ export async function GET() {
     // 2. Reset Repositories
     await auditRepository.reset();
     await rujukanRepository.reset();
+    await notifikasiRepository.reset();
 
     return NextResponse.json({
       success: true,
