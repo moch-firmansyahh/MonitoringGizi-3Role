@@ -103,7 +103,7 @@ export default function DinkesDashboardPage() {
                 Dashboard Dinas Kesehatan
               </h1>
               <p className="font-inter text-[13px] sm:text-[13.5px] text-zinc-500 dark:text-zinc-400">
-                Pengawasan sebaran status gizi wilayah &amp; audit trail terpusat RabbitMQ
+                Pengawasan sebaran status gizi wilayah &amp; rekam jejak aktivitas terpadu
               </p>
             </div>
 
@@ -123,7 +123,7 @@ export default function DinkesDashboardPage() {
                 className="h-[42px] px-4 rounded-xl bg-[#0d472c] hover:bg-[#0a3923] text-white font-medium text-[13.5px] flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
               >
                 <Activity className="w-4 h-4 stroke-[2]" />
-                <span>Live Audit Broker</span>
+                <span>Log Aktivitas Data</span>
               </Link>
             </div>
           </div>
@@ -312,14 +312,14 @@ export default function DinkesDashboardPage() {
               </div>
             </div>
 
-            {/* Right Column (5 cols): Live Stream Audit Log RabbitMQ */}
+            {/* Right Column (5 cols): Live Stream Aktivitas Terkini */}
             <div className="lg:col-span-5 bg-white dark:bg-[#161920] rounded-[20px] [@media(min-height:850px)]:rounded-[24px] border border-[#e6e8eb] dark:border-[#262a34] p-5 sm:p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-between space-y-4">
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                     <h2 className="font-inter text-[17px] font-bold text-zinc-900 dark:text-zinc-100">
-                      Jejak Event RabbitMQ
+                      Aktivitas Masuk Terkini
                     </h2>
                   </div>
                   <Link
@@ -331,43 +331,64 @@ export default function DinkesDashboardPage() {
                   </Link>
                 </div>
                 <p className="text-[12.5px] text-zinc-500 dark:text-zinc-400 mt-1">
-                  Antrean: <code className="text-[11px] bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">simgizi.audit.laporan</code>
+                  Sinkronisasi Otomatis • Lintas Faskes
                 </p>
               </div>
 
               {/* List 4 event terbaru */}
               <div className="space-y-2.5 overflow-hidden">
-                {recentLogs.slice(0, 4).map((log: any) => (
-                  <div
-                    key={log.id}
-                    className="p-3 rounded-xl bg-gray-50/80 dark:bg-[#1e222d] border border-gray-100 dark:border-zinc-800 text-[12.5px]"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-mono text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded">
-                        {log.eventType}
-                      </span>
-                      <span className="text-[11px] text-zinc-400">
-                        {new Date(log.timestamp).toLocaleTimeString("id-ID", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
+                {recentLogs.slice(0, 4).map((log: any) => {
+                  const eventLabel =
+                    log.eventType === "pengukuran.created"
+                      ? "Penimbangan Balita"
+                      : log.eventType === "rujukan.created"
+                      ? "Pengajuan Rujukan"
+                      : "Tindakan Puskesmas";
+                  const eventStyle =
+                    log.eventType === "pengukuran.created"
+                      ? "text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60"
+                      : log.eventType === "rujukan.created"
+                      ? "text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60"
+                      : "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60";
+
+                  return (
+                    <div
+                      key={log.id}
+                      className="p-3 rounded-xl bg-gray-50/80 dark:bg-[#1e222d] border border-gray-100 dark:border-zinc-800 text-[12.5px]"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded ${eventStyle}`}>
+                          {eventLabel}
+                        </span>
+                        <span className="text-[11px] text-zinc-400">
+                          {new Date(log.timestamp).toLocaleTimeString("id-ID", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}{" "}
+                          WIB
+                        </span>
+                      </div>
+                      <p className="text-zinc-700 dark:text-zinc-300 font-medium line-clamp-1">
+                        {log.ringkasan}
+                      </p>
+                      <div className="flex items-center justify-between mt-1 text-[11px] text-zinc-400">
+                        <span>
+                          Pengirim:{" "}
+                          <span className="font-medium text-zinc-600 dark:text-zinc-300 capitalize">
+                            {log.producer === "posyandu" ? "Posyandu" : "Puskesmas"}
+                          </span>
+                        </span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                          ✔ Tersinkron
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-zinc-700 dark:text-zinc-300 font-medium line-clamp-1">
-                      {log.ringkasan}
-                    </p>
-                    <div className="flex items-center justify-between mt-1 text-[11px] text-zinc-400">
-                      <span>Produser: {log.producer}</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                        ✔ Ack Recorded
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="pt-2 border-t border-gray-100 dark:border-zinc-800 text-[12px] text-zinc-500 flex items-center justify-between">
-                <span>Consumer 3 RabbitMQ</span>
+                <span>Layanan Pengawasan Dinas</span>
                 <span className="text-emerald-600 font-semibold">Aktif Berjalan</span>
               </div>
             </div>

@@ -1,124 +1,134 @@
 import { AuditLogItem } from "@/types";
 import { BaseEventPayload, PengukuranEventData, RujukanEventData } from "@/lib/broker/events";
 
-const INITIAL_AUDIT_LOGS: AuditLogItem[] = [
-  {
-    id: "aud-001",
-    eventId: "evt_1791720000000_arf01",
-    eventType: "rujukan.created",
-    routingKey: "rujukan.created",
-    timestamp: "2026-08-12T08:35:00Z",
-    producer: "posyandu",
-    ringkasan: "Pengajuan rujukan stunting darurat ananda Muhammad Arfan ke Puskesmas Bojongsoang",
-    namaAnak: "Muhammad Arfan",
-    faskes: "Posyandu Melati 03",
-    status: "diajukan",
-    data: {
-      idAnak: "d0000000-0000-0000-0000-000000000001",
+function createInitialAuditLogs(): AuditLogItem[] {
+  const now = new Date();
+  const m15 = new Date(now.getTime() - 15 * 60 * 1000).toISOString();
+  const m25 = new Date(now.getTime() - 25 * 60 * 1000).toISOString();
+  const m45 = new Date(now.getTime() - 45 * 60 * 1000).toISOString();
+  const h1 = new Date(now.getTime() - 90 * 60 * 1000).toISOString();
+  const h2 = new Date(now.getTime() - 150 * 60 * 1000).toISOString();
+  const h4 = new Date(now.getTime() - 240 * 60 * 1000).toISOString();
+
+  return [
+    {
+      id: "aud-001",
+      eventId: `evt_${Date.now()}_arf01`,
+      eventType: "rujukan.created",
+      routingKey: "rujukan.created",
+      timestamp: m15,
+      producer: "posyandu",
+      ringkasan: "Pengajuan rujukan stunting ananda Muhammad Arfan ke Poli KIA Puskesmas Bojongsoang",
       namaAnak: "Muhammad Arfan",
-      zTbu: -3.61,
-      statusGizi: "stunting",
+      faskes: "Posyandu Melati 03",
+      status: "diajukan",
+      data: {
+        idAnak: "d0000000-0000-0000-0000-000000000001",
+        namaAnak: "Muhammad Arfan",
+        zTbu: -3.61,
+        statusGizi: "stunting",
+      },
     },
-  },
-  {
-    id: "aud-002",
-    eventId: "evt_1791719900000_arf02",
-    eventType: "pengukuran.created",
-    routingKey: "pengukuran.created",
-    timestamp: "2026-08-12T08:30:00Z",
-    producer: "posyandu",
-    ringkasan: "Pencatatan penimbangan balita Muhammad Arfan (BB: 10.1 kg, TB: 78.5 cm, TB/U: -3.61 SD)",
-    namaAnak: "Muhammad Arfan",
-    faskes: "Posyandu Melati 03",
-    status: "stunting",
-    data: {
-      idAnak: "d0000000-0000-0000-0000-000000000001",
+    {
+      id: "aud-002",
+      eventId: `evt_${Date.now() - 10000}_arf02`,
+      eventType: "pengukuran.created",
+      routingKey: "pengukuran.created",
+      timestamp: m25,
+      producer: "posyandu",
+      ringkasan: "Pencatatan penimbangan balita Muhammad Arfan (BB: 10.1 kg, TB: 78.5 cm, Status: Stunting)",
       namaAnak: "Muhammad Arfan",
-      beratKg: 10.1,
-      tinggiCm: 78.5,
-      zTbu: -3.61,
+      faskes: "Posyandu Melati 03",
+      status: "stunting",
+      data: {
+        idAnak: "d0000000-0000-0000-0000-000000000001",
+        namaAnak: "Muhammad Arfan",
+        beratKg: 10.1,
+        tinggiCm: 78.5,
+        zTbu: -3.61,
+      },
     },
-  },
-  {
-    id: "aud-003",
-    eventId: "evt_1791715000000_daf01",
-    eventType: "rujukan.created",
-    routingKey: "rujukan.created",
-    timestamp: "2026-08-12T08:15:00Z",
-    producer: "posyandu",
-    ringkasan: "Pengajuan rujukan balita gizi buruk ananda Dafa Ibrahim ke Poli KIA Puskesmas Bojongsoang",
-    namaAnak: "Dafa Ibrahim",
-    faskes: "Posyandu Melati 03",
-    status: "diajukan",
-    data: {
+    {
+      id: "aud-003",
+      eventId: `evt_${Date.now() - 20000}_daf01`,
+      eventType: "rujukan.created",
+      routingKey: "rujukan.created",
+      timestamp: m45,
+      producer: "posyandu",
+      ringkasan: "Pengajuan rujukan balita gizi buruk ananda Dafa Ibrahim ke Poli KIA Puskesmas Bojongsoang",
       namaAnak: "Dafa Ibrahim",
-      statusGizi: "gizi_buruk",
+      faskes: "Posyandu Melati 03",
+      status: "diajukan",
+      data: {
+        namaAnak: "Dafa Ibrahim",
+        statusGizi: "gizi_buruk",
+      },
     },
-  },
-  {
-    id: "aud-004",
-    eventId: "evt_1791710000000_asy01",
-    eventType: "rujukan.updated",
-    routingKey: "rujukan.updated",
-    timestamp: "2026-08-11T10:45:00Z",
-    producer: "puskesmas",
-    ringkasan: "Dokter Puskesmas Bojongsoang menerima rujukan ananda Aisyah Putri Humaira",
-    namaAnak: "Aisyah Putri Humaira",
-    faskes: "Puskesmas Bojongsoang",
-    status: "diterima",
-    data: {
+    {
+      id: "aud-004",
+      eventId: `evt_${Date.now() - 30000}_asy01`,
+      eventType: "rujukan.updated",
+      routingKey: "rujukan.updated",
+      timestamp: h1,
+      producer: "puskesmas",
+      ringkasan: "Dokter Puskesmas Bojongsoang menerima dan menindaklanjuti rujukan ananda Aisyah Putri Humaira",
       namaAnak: "Aisyah Putri Humaira",
-      status: "diterima",
-      dokter: "Dr. Hj. Syahla Mutiara Latifah, M.Kes",
+      faskes: "Puskesmas Bojongsoang",
+      status: "ditindaklanjuti",
+      data: {
+        namaAnak: "Aisyah Putri Humaira",
+        status: "ditindaklanjuti",
+        dokter: "Dr. Hj. Syahla Mutiara Latifah, M.Kes",
+      },
     },
-  },
-  {
-    id: "aud-005",
-    eventId: "evt_1791705000000_asy02",
-    eventType: "rujukan.created",
-    routingKey: "rujukan.created",
-    timestamp: "2026-08-11T09:20:00Z",
-    producer: "posyandu",
-    ringkasan: "Pengajuan tiket rujukan stunting ananda Aisyah Putri Humaira dari Posyandu Mekar Sari 01",
-    namaAnak: "Aisyah Putri Humaira",
-    faskes: "Posyandu Mekar Sari 01",
-    status: "diajukan",
-    data: {
+    {
+      id: "aud-005",
+      eventId: `evt_${Date.now() - 40000}_asy02`,
+      eventType: "rujukan.created",
+      routingKey: "rujukan.created",
+      timestamp: h2,
+      producer: "posyandu",
+      ringkasan: "Pengajuan tiket rujukan stunting ananda Aisyah Putri Humaira dari Posyandu Mekar Sari 01",
       namaAnak: "Aisyah Putri Humaira",
-      statusGizi: "stunting",
+      faskes: "Posyandu Mekar Sari 01",
+      status: "diajukan",
+      data: {
+        namaAnak: "Aisyah Putri Humaira",
+        statusGizi: "stunting",
+      },
     },
-  },
-  {
-    id: "aud-006",
-    eventId: "evt_1791690000000_knz01",
-    eventType: "pengukuran.created",
-    routingKey: "pengukuran.created",
-    timestamp: "2026-08-10T08:50:00Z",
-    producer: "posyandu",
-    ringkasan: "Penimbangan ananda Kenzo Rafasya (BB: 11.2 kg, TB: 85.0 cm, Gizi Kurang)",
-    namaAnak: "Kenzo Rafasya",
-    faskes: "Posyandu Melati 03",
-    status: "gizi_kurang",
-    data: {
+    {
+      id: "aud-006",
+      eventId: `evt_${Date.now() - 50000}_knz01`,
+      eventType: "pengukuran.created",
+      routingKey: "pengukuran.created",
+      timestamp: h4,
+      producer: "posyandu",
+      ringkasan: "Pencatatan penimbangan balita Kenzo Rafasya (BB: 11.2 kg, TB: 85.0 cm, Gizi Kurang)",
       namaAnak: "Kenzo Rafasya",
-      statusGizi: "gizi_kurang",
+      faskes: "Posyandu Melati 03",
+      status: "gizi_kurang",
+      data: {
+        namaAnak: "Kenzo Rafasya",
+        statusGizi: "gizi_kurang",
+      },
     },
-  },
-];
+  ];
+}
 
 const globalForAudit = globalThis as unknown as {
   __localAuditStore?: AuditLogItem[];
   __localAuditStoreVersion?: number;
 };
 
-const CURRENT_AUDIT_VERSION = 1;
+const CURRENT_AUDIT_VERSION = 2;
 
 const getAuditStore = (): AuditLogItem[] => {
   if (
     !globalForAudit.__localAuditStore ||
     globalForAudit.__localAuditStoreVersion !== CURRENT_AUDIT_VERSION
   ) {
-    globalForAudit.__localAuditStore = [...INITIAL_AUDIT_LOGS];
+    globalForAudit.__localAuditStore = createInitialAuditLogs();
     globalForAudit.__localAuditStoreVersion = CURRENT_AUDIT_VERSION;
   }
   return globalForAudit.__localAuditStore;
@@ -213,6 +223,6 @@ export const auditRepository = {
   },
 
   async reset(): Promise<void> {
-    globalForAudit.__localAuditStore = [...INITIAL_AUDIT_LOGS];
+    globalForAudit.__localAuditStore = createInitialAuditLogs();
   },
 };

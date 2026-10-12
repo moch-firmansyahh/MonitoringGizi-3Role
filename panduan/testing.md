@@ -390,18 +390,21 @@ Pengujian dilakukan dalam satu lintasan alur berurutan yang mencakup 4 tahap:
 
 ---
 
-#### Langkah 14: Verifikasi Audit Trail Message Broker (Consumer 3)
+#### Langkah 14: Verifikasi Log Riwayat & Sinkronisasi Data (Consumer 3)
 
-1. Di sidebar kiri, klik menu **"Audit Trail Broker"** ([http://localhost:3000/dinkes/audit-log](http://localhost:3000/dinkes/audit-log)).
+1. Di sidebar kiri, klik menu **"Riwayat Aktivitas Data"** ([http://localhost:3000/dinkes/audit-log](http://localhost:3000/dinkes/audit-log)).
 2. **Hasil pada UI**:
-   - **Badge Consumer 3**: `Consumer 3 (Dinas Kesehatan) • Queue: simgizi.audit.laporan`.
-   - **Status Antrean**: Koneksi aktif ke Exchange `simgizi.events`.
-   - **Tabel Log Live Event**:
-     - Baris event `pengukuran.created` dari Kader Posyandu.
-     - Baris event `rujukan.created` saat rujukan stunting dibuat.
-     - Baris event `rujukan.updated` saat Dokter Puskesmas memberikan tindakan.
-   - **Inspeksi Payload JSON**:
-     - Klik tombol **"Lihat JSON"** pada baris event untuk memeriksa payload mentah AMQP (`eventId`, `timestamp`, `producer`, `data`).
+   - **Badge Identitas**: `Dinas Kesehatan Kab. Bandung • Jalur Pengawasan Terpadu`.
+   - **Status Integrasi**: `Terhubung Otomatis` (Layanan Pengawasan Siaga Real-Time).
+   - **Tabel Log Riwayat Aktivitas**:
+     - Aktivitas **Penimbangan Balita** (`pengukuran.created`) dari Kader Posyandu.
+     - Aktivitas **Pengajuan Rujukan** (`rujukan.created`) saat rujukan stunting dibuat.
+     - Aktivitas **Tindakan Puskesmas** (`rujukan.updated`) saat Dokter Puskesmas memberikan penanganan.
+     - Status Pengiriman: Badge hijau **Tersinkronisasi**.
+   - **Inspeksi Rincian Informasi**:
+     - Klik tombol **"Lihat Detail"** pada baris aktivitas.
+     - Tab **"Ringkasan Informasi"**: Menampilkan rincian manusiawi yang rapi (nama balita, posyandu/puskesmas, diagnosis dokter, resep bantuan PMT).
+     - Tab **"Format Teknis (JSON)"**: Tersedia opsi melihat data teknis mentah AMQP/RabbitMQ beserta tombol **"Salin Data JSON"**.
 
 ---
 

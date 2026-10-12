@@ -124,7 +124,7 @@ export const ROLE_NAV_ITEMS: Record<RolePengguna, NavItem[]> = {
     },
     {
       id: "audit-log",
-      label: "Audit Trail Broker",
+      label: "Riwayat Aktivitas Data",
       icon: Activity,
       href: "/dinkes/audit-log",
     },
