@@ -75,6 +75,26 @@ export const DEMO_PROFILES: Record<string, UserProfile & { passwordHash: string 
     idPuskesmas: null,
     telepon: "081234567895",
   },
+  orangtua_dafa: {
+    id: "c0000000-0000-0000-0000-000000000008",
+    username: "orangtua_dafa",
+    passwordHash: "simgizi2026",
+    namaLengkap: "Ibrahim Hasan (Ayah Dafa)",
+    role: "orang_tua",
+    idPosyandu: null,
+    idPuskesmas: null,
+    telepon: "081234567896",
+  },
+  orangtua_kenzo: {
+    id: "c0000000-0000-0000-0000-000000000009",
+    username: "orangtua_kenzo",
+    passwordHash: "simgizi2026",
+    namaLengkap: "Ferry Irawan (Ayah Kenzo)",
+    role: "orang_tua",
+    idPosyandu: null,
+    idPuskesmas: null,
+    telepon: "081234567897",
+  },
 
   // --- 1 Akun Dinas Kesehatan ---
   dinkes_bandung: {

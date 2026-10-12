@@ -40,6 +40,12 @@ export async function GET(request: NextRequest) {
         if (user.username === "orangtua_aisyah") {
           return parent === "hendra wijaya";
         }
+        if (user.username === "orangtua_dafa") {
+          return parent === "ibrahim hasan";
+        }
+        if (user.username === "orangtua_kenzo") {
+          return parent === "ferry irawan";
+        }
         return parent.includes(cleanParentName) || cleanParentName.includes(parent);
       });
 

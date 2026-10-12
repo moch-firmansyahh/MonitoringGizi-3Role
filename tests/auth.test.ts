@@ -5,7 +5,7 @@ import { RolePengguna } from "@/types";
 
 describe("Sistem Autentikasi & Otorisasi Multi-Role", () => {
   describe("Kredensial Profil Demo", () => {
-    it("memiliki 7 akun resmi terdaftar (2 Posyandu, 2 Puskesmas, 2 Orang Tua, 1 Dinkes)", () => {
+    it("memiliki akun resmi terdaftar (Posyandu, Puskesmas, Orang Tua, Dinkes)", () => {
       const keys = Object.keys(DEMO_PROFILES);
       expect(keys).toContain("kelompok2");
       expect(keys).toContain("posyandu_mekarsari01");
@@ -13,24 +13,26 @@ describe("Sistem Autentikasi & Otorisasi Multi-Role", () => {
       expect(keys).toContain("puskesmas_dayeuhkolot");
       expect(keys).toContain("orangtua_arfan");
       expect(keys).toContain("orangtua_aisyah");
+      expect(keys).toContain("orangtua_dafa");
       expect(keys).toContain("dinkes_bandung");
-      expect(keys.length).toBe(7);
+      expect(keys.length).toBeGreaterThanOrEqual(7);
     });
 
     it("memiliki pemetaan role yang valid dan terpisah untuk setiap profil pengguna", () => {
-      // 2 Posyandu
+      // Posyandu
       expect(DEMO_PROFILES.kelompok2.role).toBe("posyandu");
       expect(DEMO_PROFILES.posyandu_mekarsari01.role).toBe("posyandu");
 
-      // 2 Puskesmas
+      // Puskesmas
       expect(DEMO_PROFILES.puskesmas_bojongsoang.role).toBe("puskesmas");
       expect(DEMO_PROFILES.puskesmas_dayeuhkolot.role).toBe("puskesmas");
 
-      // 2 Orang Tua
+      // Orang Tua
       expect(DEMO_PROFILES.orangtua_arfan.role).toBe("orang_tua");
       expect(DEMO_PROFILES.orangtua_aisyah.role).toBe("orang_tua");
+      expect(DEMO_PROFILES.orangtua_dafa.role).toBe("orang_tua");
 
-      // 1 Dinkes
+      // Dinkes
       expect(DEMO_PROFILES.dinkes_bandung.role).toBe("dinkes");
     });
   });

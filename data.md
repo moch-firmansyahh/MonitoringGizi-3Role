@@ -7,7 +7,7 @@ Dokumen ini berisi daftar **seluruh akun login** dan **paket data balita siap pa
 
 ---
 
-## 📋 Daftar Seluruh Akun Pengujian (7 Akun Resmi)
+## 📋 Daftar Seluruh Akun Pengujian Resmi
 
 | # | Peran (Role) | Tab Login | Username | Password | Nama Profil & Instansi |
 | :-: | :--- | :--- | :--- | :--- | :--- |
@@ -17,7 +17,9 @@ Dokumen ini berisi daftar **seluruh akun login** dan **paket data balita siap pa
 | **4** | **Dokter Puskesmas (Wilayah 2)**| Puskesmas | `puskesmas_dayeuhkolot` | `simgizi2026` | Dr. Ahmad Fauzi, Sp.A *(Puskesmas Dayeuhkolot)* |
 | **5** | **Orang Tua (Wali Arfan)** | Orang Tua | `orangtua_arfan` | `simgizi2026` | Rahmat Hidayat *(Ayah Muhammad Arfan)* |
 | **6** | **Orang Tua (Wali Aisyah)** | Orang Tua | `orangtua_aisyah` | `simgizi2026` | Hendra Wijaya *(Ayah Aisyah Putri Humaira)* |
-| **7** | **Dinas Kesehatan (Dinkes)** | Dinkes | `dinkes_bandung` | `simgizi2026` | Dra. Hj. Nunung Nurhayati, M.Si *(Dinkes Kab. Bandung)* |
+| **7** | **Orang Tua (Wali Dafa)** | Orang Tua | `orangtua_dafa` | `simgizi2026` | Ibrahim Hasan *(Ayah Dafa Ibrahim)* |
+| **8** | **Orang Tua (Wali Kenzo)** | Orang Tua | `orangtua_kenzo` | `simgizi2026` | Ferry Irawan *(Ayah Kenzo Rafasya)* |
+| **9** | **Dinas Kesehatan (Dinkes)** | Dinkes | `dinkes_bandung` | `simgizi2026` | Dra. Hj. Nunung Nurhayati, M.Si *(Dinkes Kab. Bandung)* |
 
 ---
 
@@ -27,7 +29,7 @@ Dokumen ini berisi daftar **seluruh akun login** dan **paket data balita siap pa
 ### 1. Data Login yang Digunakan
 1. **Posyandu**: `kelompok2` / `simgizi2026`
 2. **Puskesmas**: `puskesmas_bojongsoang` / `simgizi2026`
-3. **Orang Tua**: `orangtua_arfan` / `simgizi2026`
+3. **Orang Tua**: `orangtua_arfan` / `simgizi2026` *(Rahmat Hidayat)*
 4. **Dinkes**: `dinkes_bandung` / `simgizi2026`
 
 ### 2. Data Input Penimbangan Balita
@@ -44,7 +46,7 @@ Dokumen ini berisi daftar **seluruh akun login** dan **paket data balita siap pa
 ### 3. Hasil & Bukti Pengujian
 - **Status Gizi**: **`Stunting`** (Z-Score TB/U = `-3.61 SD`).
 - **Puskesmas**: Tiket rujukan otomatis masuk ke [http://localhost:3000/puskesmas/rujukan](http://localhost:3000/puskesmas/rujukan).
-- **Orang Tua**: Notifikasi lonceng berdering & status rujukan tampil di [http://localhost:3000/orang-tua](http://localhost:3000/orang-tua).
+- **Orang Tua (`orangtua_arfan`)**: Notifikasi lonceng berdering & status rujukan tampil di [http://localhost:3000/orang-tua](http://localhost:3000/orang-tua).
 - **Dinkes**: Tercatat di log aktivitas [http://localhost:3000/dinkes/audit-log](http://localhost:3000/dinkes/audit-log).
 
 ---
@@ -55,7 +57,8 @@ Dokumen ini berisi daftar **seluruh akun login** dan **paket data balita siap pa
 ### 1. Data Login yang Digunakan
 1. **Posyandu**: `kelompok2` / `simgizi2026`
 2. **Puskesmas**: `puskesmas_bojongsoang` / `simgizi2026`
-3. **Dinkes**: `dinkes_bandung` / `simgizi2026`
+3. **Orang Tua**: `orangtua_dafa` / `simgizi2026` *(Ibrahim Hasan)*
+4. **Dinkes**: `dinkes_bandung` / `simgizi2026`
 
 ### 2. Data Input Penimbangan Balita
 - **Halaman**: [http://localhost:3000/pencatatan-anak](http://localhost:3000/pencatatan-anak)
@@ -72,6 +75,7 @@ Dokumen ini berisi daftar **seluruh akun login** dan **paket data balita siap pa
 - **Status Gizi**: **`Gizi Buruk`** (Z-Score BB/TB < `-3.0 SD`).
 - **Puskesmas**: Notifikasi triage peringatan dini kasus Gizi Buruk muncul pada dashboard Puskesmas.
 - **Rujukan**: Masuk ke daftar penanganan prioritas tinggi Poli Gizi Puskesmas.
+- **Orang Tua (`orangtua_dafa`)**: Login di [http://localhost:3000/login](http://localhost:3000/login), portal memuat kartu kesehatan ananda Dafa Ibrahim dengan status gizi buruk dan rujukan aktif.
 
 ---
 
@@ -80,7 +84,8 @@ Dokumen ini berisi daftar **seluruh akun login** dan **paket data balita siap pa
 
 ### 1. Data Login yang Digunakan
 1. **Posyandu**: `kelompok2` / `simgizi2026`
-2. **Dinkes**: `dinkes_bandung` / `simgizi2026`
+2. **Orang Tua**: `orangtua_kenzo` / `simgizi2026` *(Ferry Irawan)*
+3. **Dinkes**: `dinkes_bandung` / `simgizi2026`
 
 ### 2. Data Input Penimbangan Balita
 - **Halaman**: [http://localhost:3000/pencatatan-anak](http://localhost:3000/pencatatan-anak)
@@ -97,6 +102,7 @@ Dokumen ini berisi daftar **seluruh akun login** dan **paket data balita siap pa
 - **Status Gizi**: **`Gizi Kurang`** (Z-Score BB/U = `-1.8 SD s.d. -2.2 SD`).
 - **Rekomendasi AI**: Edukasi asupan gizi seimbang, pemberian makanan tambahan (PMT lokal telur & ikan), serta jadwal pantau bulan depan.
 - **Rujukan**: Tidak dibuat rujukan ke Puskesmas (cukup pantau berkala di Posyandu).
+- **Orang Tua (`orangtua_kenzo`)**: Melihat grafik kurva tumbuh kembang Kenzo Rafasya di portal orang tua.
 
 ---
 
@@ -177,7 +183,7 @@ Respon sukses:
    - Gunakan 4 jendela peramban berbeda:
      1. Chrome Biasa ➔ Posyandu (`kelompok2`)
      2. Chrome Mode Incognito (Samaran) ➔ Puskesmas (`puskesmas_bojongsoang`)
-     3. Microsoft Edge Biasa ➔ Orang Tua (`orangtua_arfan`)
+     3. Microsoft Edge Biasa ➔ Orang Tua (`orangtua_arfan` atau `orangtua_dafa`)
      4. Microsoft Edge Mode InPrivate ➔ Dinkes (`dinkes_bandung`)
 2. **Validasi NIK**: Harus tepat **16 digit angka**. Bila NIK sudah ada di sistem, cukup ubah digit terakhir (misal dari `...0001` ke `...0099`).
 3. **Worker Antrean**: Pastikan `npm run worker` menyala di terminal kedua agar setiap event tercetak secara langsung di konsol.
