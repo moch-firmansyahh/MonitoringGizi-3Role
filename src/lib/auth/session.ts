@@ -75,6 +75,18 @@ export const DEMO_PROFILES: Record<string, UserProfile & { passwordHash: string 
     idPuskesmas: null,
     telepon: "081234567895",
   },
+
+  // --- 1 Akun Dinas Kesehatan ---
+  dinkes_bandung: {
+    id: "c0000000-0000-0000-0000-000000000007",
+    username: "dinkes_bandung",
+    passwordHash: "simgizi2026",
+    namaLengkap: "Dra. Hj. Nunung Nurhayati, M.Si",
+    role: "dinkes",
+    idPosyandu: null,
+    idPuskesmas: null,
+    telepon: "081234567899",
+  },
 };
 
 /**
@@ -88,6 +100,7 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
   if (!sessionToken) {
     // 1. Jika roleCookie ada (disimpan oleh login atau client), prioritaskan ini!
     if (roleCookie) {
+      if (roleCookie === "dinkes") return DEMO_PROFILES.dinkes_bandung;
       if (roleCookie === "puskesmas") return DEMO_PROFILES.puskesmas_bojongsoang;
       if (roleCookie === "orang_tua") return DEMO_PROFILES.orangtua_arfan;
       return DEMO_PROFILES.kelompok2;

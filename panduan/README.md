@@ -28,6 +28,7 @@ Folder ini memuat panduan operasional, diagram arsitektur, dan alur pengujian re
 | **Kader Posyandu** | `kelompok2` | Posyandu Melati 03 | [http://localhost:3000/](http://localhost:3000/) |
 | **Dokter Puskesmas** | `puskesmas_bojongsoang` | Puskesmas Bojongsoang | [http://localhost:3000/puskesmas](http://localhost:3000/puskesmas) |
 | **Orang Tua Balita** | `orangtua_arfan` | Rahmat Hidayat (Ayah Arfan & Hanif) | [http://localhost:3000/orang-tua](http://localhost:3000/orang-tua) |
+| **Dinas Kesehatan** | `dinkes_bandung` | Dinkes Kab. Bandung (Surveilans & Audit) | [http://localhost:3000/dinkes](http://localhost:3000/dinkes) |
 
 ---
 

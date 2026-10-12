@@ -37,7 +37,7 @@ export async function POST(request: Request) {
             .single();
 
           if (profile) {
-            const role = profile.role as "posyandu" | "puskesmas" | "orang_tua";
+            const role = profile.role as "posyandu" | "puskesmas" | "orang_tua" | "dinkes";
             const redirectTo = ROLE_HOMEPAGE[role] || "/";
 
             const res = NextResponse.json({

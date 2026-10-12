@@ -12,6 +12,7 @@ export const ROLE_ROUTE_PREFIXES: Record<RolePengguna, string[]> = {
   ],
   puskesmas: ["/puskesmas", "/anak"],
   orang_tua: ["/orang-tua"],
+  dinkes: ["/dinkes", "/anak"],
 };
 
 export const AUTH_COOKIE_NAME = "simgizi_session";

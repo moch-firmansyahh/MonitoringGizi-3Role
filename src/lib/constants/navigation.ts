@@ -11,6 +11,8 @@ import {
   TrendingUp,
   Calendar,
   PlusCircle,
+  Activity,
+  Package,
   LucideIcon,
 } from "lucide-react";
 import { RolePengguna } from "@/types";
@@ -113,10 +115,37 @@ export const ROLE_NAV_ITEMS: Record<RolePengguna, NavItem[]> = {
       href: "/orang-tua/klaim",
     },
   ],
+  dinkes: [
+    {
+      id: "dashboard",
+      label: "Surveilans Wilayah",
+      icon: LayoutDashboard,
+      href: "/dinkes",
+    },
+    {
+      id: "audit-log",
+      label: "Audit Trail Broker",
+      icon: Activity,
+      href: "/dinkes/audit-log",
+    },
+    {
+      id: "faskes",
+      label: "Faskes & Posyandu",
+      icon: Building2,
+      href: "/dinkes/faskes",
+    },
+    {
+      id: "logistik",
+      label: "Distribusi PMT",
+      icon: Package,
+      href: "/dinkes/logistik",
+    },
+  ],
 };
 
 export const ROLE_HOMEPAGE: Record<RolePengguna, string> = {
   posyandu: "/",
   puskesmas: "/puskesmas",
   orang_tua: "/orang-tua",
+  dinkes: "/dinkes",
 };

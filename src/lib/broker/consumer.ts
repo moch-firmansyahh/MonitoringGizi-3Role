@@ -9,6 +9,7 @@ import {
   PengukuranEventData,
   RujukanEventData,
 } from "./events";
+import { auditRepository } from "@/lib/repositories/audit.repository";
 
 /**
  * Consumer 1: Puskesmas Triage Service
@@ -111,6 +112,8 @@ async function startConsumerAudit(channel: Channel) {
         console.log(
           `\x1b[32m[Consumer 3 - Audit Dinkes]\x1b[0m [${payload.timestamp}] Event: ${payload.eventType} | Producer: ${payload.producer}`,
         );
+
+        auditRepository.recordEvent(payload).catch(() => {});
 
         channel.ack(msg);
       } catch (err) {

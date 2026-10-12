@@ -1,6 +1,6 @@
 # 📘 PANDUAN PENGUJIAN END-TO-END & INTEGRASI MESSAGE BROKER RABBITMQ — SIMGIZI
 
-Dokumen ini adalah **panduan pengujian sistem terlengkap dan satu alur lurus (End-to-End)** dari awal hingga akhir, yang menghubungkan 3 peran pengguna (**Kader Posyandu**, **Dokter Puskesmas**, dan **Orang Tua Balita**) dengan sistem **Message Broker RabbitMQ**.
+Dokumen ini adalah **panduan pengujian sistem terlengkap dan satu alur lurus (End-to-End)** dari awal hingga akhir, yang menghubungkan 4 peran pengguna (**Kader Posyandu**, **Dokter Puskesmas**, **Orang Tua Balita**, dan **Dinas Kesehatan**) dengan sistem **Message Broker RabbitMQ**.
 
 Panduan ini disusun secara berurutan dan transparan, menjelaskan **di halaman mana Anda berada**, **data apa yang diinput**, serta **di mana saja Message Broker bekerja** (Exchange, Routing Key, Queue, Payload, dan Log Terminal Worker).
 
@@ -39,10 +39,16 @@ flowchart TD
         B4 -->|Publisher 3| MB3
     end
 
-    subgraph OrangTua ["🟣 3. ORANG TUA BALITA (Consumer Akhir)"]
+    subgraph OrangTua ["🟣 3. ORANG TUA BALITA (Consumer Notifikasi)"]
         Q2 --> C1["Consumer 2: Layanan Notifikasi Orang Tua"]
         C1 --> C2["Lonceng Notifikasi Berdering di Portal Ortu"]
         C2 --> C3["Orang Tua Baca Instruksi PMT Dokter & Pantau Kurva WHO"]
+    end
+
+    subgraph Dinkes ["🏢 4. DINAS KESEHATAN (Consumer Audit & Surveilans)"]
+        Q3 --> D1["Consumer 3: Audit Trail & Surveilans Wilayah"]
+        D1 --> D2["Live Stream Log Event Broker (Semua Event)"]
+        D2 --> D3["Monitoring Epidemiologi Stunting & Logistik PMT Lintas Faskes"]
     end
 ```
 
@@ -89,6 +95,7 @@ Sebelum memulai pengujian, pastikan service berikut menyala di komputer:
 | **Kader Posyandu**   | `kelompok2`             | `simgizi2026` | Posyandu Melati 03    | [http://localhost:3000/](http://localhost:3000/)                   |
 | **Dokter Puskesmas** | `puskesmas_bojongsoang` | `simgizi2026` | Puskesmas Bojongsoang | [http://localhost:3000/puskesmas](http://localhost:3000/puskesmas) |
 | **Orang Tua Balita** | `orangtua_arfan`        | `simgizi2026` | Keluarga Arfan        | [http://localhost:3000/orang-tua](http://localhost:3000/orang-tua) |
+| **Dinas Kesehatan**  | `dinkes_bandung`        | `simgizi2026` | Dinkes Kab. Bandung   | [http://localhost:3000/dinkes](http://localhost:3000/dinkes)       |
 
 ---
 
@@ -324,6 +331,67 @@ Pada formulir **Pencatatan Data Anak** (`/pencatatan-anak`):
 
 ---
 
+## 🏢 TAHAP 4: PENGUJIAN DINAS KESEHATAN (CONSUMER AUDIT & SURVEILANS WILAYAH)
+
+Peran **Dinas Kesehatan** bertindak sebagai **Consumer 3** (`simgizi.audit.laporan`), menerima salinan seluruh event dari sistem untuk keperluan pengawasan epidemiologi wilayah, pemantauan logistik PMT, dan audit trail kepatuhan medis.
+
+### Langkah 12: Login Dinas Kesehatan Kabupaten Bandung
+
+1. Buka halaman login: [http://localhost:3000/login](http://localhost:3000/login).
+2. Masukkan kredensial:
+   - **Username**: `dinkes_bandung`
+   - **Password**: `simgizi2026`
+3. Klik tombol **"Masuk ke Sistem"**.
+4. Sistem otomatis mengarahkan ke dashboard khusus Dinas Kesehatan: [http://localhost:3000/dinkes](http://localhost:3000/dinkes).
+
+---
+
+### Langkah 13: Pantau Surveilans Epidemiologi & Sebaran Wilayah
+
+1. Di halaman [http://localhost:3000/dinkes](http://localhost:3000/dinkes):
+2. **Apa yang terlihat di layar**:
+   - **Kartu Metrik Wilayah**:
+     - Total Balita Terdata: `30 Balita`
+     - Status Normal: `17 Balita`
+     - Total Balita Berisiko: `13 Balita` (7 Stunting, 4 Gizi Kurang, 2 Gizi Buruk)
+     - Cakupan Faskes: `3 Posyandu, 1 Puskesmas`
+   - **Distribusi Status Gizi WHO**:
+     - Visualisasi progress bar proporsional standar WHO Permenkes 2020.
+   - **Pemetaan Zona Risiko Posyandu Binaan**:
+     - Posyandu Melati 03 (3 Kasus Stunting — Zona Merah)
+     - Posyandu Mawar 01 (2 Kasus Stunting — Zona Kuning)
+     - Posyandu Anggrek 02 (2 Kasus Stunting — Zona Kuning)
+   - **Feed Event Broker Terkini**:
+     - Menampilkan 4 aktivitas RabbitMQ terbaru secara live di bagian bawah dashboard.
+
+---
+
+### Langkah 14: Verifikasi Audit Trail Message Broker (Consumer 3)
+
+1. Di sidebar kiri, klik menu **"Audit Trail Broker"** ([http://localhost:3000/dinkes/audit-log](http://localhost:3000/dinkes/audit-log)).
+2. **Apa yang terlihat di layar**:
+   - **Badge Consumer 3**: `Consumer 3 (Dinas Kesehatan) • Queue: simgizi.audit.laporan`.
+   - **Status Koneksi Broker**: Menampilkan status aktif AMQP (`simgizi.events`), total event terproses, dan rasio penerimaan (100%).
+   - **Tabel Log Live Broker**:
+     - Baris event `pengukuran.created` dari Kader Posyandu saat menimbang Muhammad Arfan.
+     - Baris event `rujukan.created` saat tiket rujukan stunting dibuat.
+     - Baris event `rujukan.updated` saat Dokter Puskesmas menerima rujukan dan meresepkan PMT.
+   - **Inspeksi Payload JSON**:
+     - Klik tombol **"Lihat JSON"** pada baris event manapun.
+     - Modal pop-up akan menampilkan payload JSON mentah AMQP lengkap dengan `eventId`, `timestamp`, `producer`, dan objek data terenkapsulasi.
+
+---
+
+### Langkah 15: Pemantauan Logistik PMT & Fasilitas Kesehatan
+
+1. Di sidebar kiri, klik menu **"Logistik PMT"** ([http://localhost:3000/dinkes/logistik](http://localhost:3000/dinkes/logistik)).
+   - Memantau ketersediaan stok paket PMT Pemulihan, Biskuit Protein Hewani, Susu Gizi Tinggi, dan multivitamin.
+   - Melihat riwayat penyaluran paket ke Puskesmas Bojongsoang dan Posyandu Melati 03.
+2. Di sidebar kiri, klik menu **"Fasilitas Kesehatan"** ([http://localhost:3000/dinkes/faskes](http://localhost:3000/dinkes/faskes)).
+   - Memantau profil 3 Posyandu binaan (Melati 03, Mawar 01, Anggrek 02) beserta jumlah kader aktif, jadwal penimbangan, dan rata-rata SLA penanganan rujukan stunting.
+
+---
+
 ## 🔍 Cara Verifikasi Teknis Message Broker (RabbitMQ)
 
 Bagi penguji teknis yang ingin membuktikan integritas antrean RabbitMQ secara independen:
@@ -381,3 +449,4 @@ curl http://localhost:3000/api/broker/status
 - [x] **Triage Medis Lengkap**: Seluruh 11 balita berisiko terpetakan otomatis ke Triage Balita Berisiko Puskesmas.
 - [x] **Event-Driven Broker**: Event `pengukuran.created`, `rujukan.created`, dan `rujukan.updated` terdistribusi sempurna ke 3 Consumer RabbitMQ.
 - [x] **Portal Orang Tua**: Notifikasi resep dokter dan kurva tumbuh kembang WHO Kemenkes 2020 tersaji secara transparan kepada keluarga balita.
+- [x] **Dashboard Dinas Kesehatan**: Surveilans epidemiologi wilayah, audit trail message broker real-time (Consumer 3), dan monitoring distribusi PMT beroperasi 100%.

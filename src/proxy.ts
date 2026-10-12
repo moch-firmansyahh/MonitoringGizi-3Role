@@ -49,21 +49,21 @@ export function proxy(request: NextRequest) {
   }
 
   // 6. Role-Based Route Protection (Akses Silang Antar Role)
-  // Puskesmas mencoba akses rute Posyandu atau Orang Tua
+  // Puskesmas mencoba akses rute Posyandu, Orang Tua, atau Dinkes
   if (role === "puskesmas") {
     const isPosyanduOnly =
       pathname === "/" ||
       pathname.startsWith("/pencatatan-anak") ||
       pathname.startsWith("/rekap-data-gizi") ||
       pathname.startsWith("/riwayat-pemeriksaan");
-    const isOrangTuaOnly = pathname.startsWith("/orang-tua");
+    const isOtherRoute = pathname.startsWith("/orang-tua") || pathname.startsWith("/dinkes");
 
-    if (isPosyanduOnly || isOrangTuaOnly) {
+    if (isPosyanduOnly || isOtherRoute) {
       return NextResponse.redirect(new URL("/puskesmas", request.url));
     }
   }
 
-  // Orang Tua mencoba akses rute faskes Posyandu atau Puskesmas
+  // Orang Tua mencoba akses rute faskes Posyandu, Puskesmas, atau Dinkes
   if (role === "orang_tua") {
     const isFaskesRoute =
       pathname === "/" ||
@@ -71,20 +71,39 @@ export function proxy(request: NextRequest) {
       pathname.startsWith("/rekap-data-gizi") ||
       pathname.startsWith("/riwayat-pemeriksaan") ||
       pathname.startsWith("/rujukan") ||
-      pathname.startsWith("/puskesmas");
+      pathname.startsWith("/puskesmas") ||
+      pathname.startsWith("/dinkes");
 
     if (isFaskesRoute) {
       return NextResponse.redirect(new URL("/orang-tua", request.url));
     }
   }
 
-  // Posyandu mencoba akses rute Puskesmas atau Orang Tua
+  // Posyandu mencoba akses rute Puskesmas, Orang Tua, atau Dinkes
   if (role === "posyandu") {
     const isOtherRoleRoute =
-      pathname.startsWith("/puskesmas") || pathname.startsWith("/orang-tua");
+      pathname.startsWith("/puskesmas") ||
+      pathname.startsWith("/orang-tua") ||
+      pathname.startsWith("/dinkes");
 
     if (isOtherRoleRoute) {
       return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  // Dinkes mencoba akses rute non-dinkes
+  if (role === "dinkes") {
+    const isOtherRoleRoute =
+      pathname === "/" ||
+      pathname.startsWith("/pencatatan-anak") ||
+      pathname.startsWith("/rekap-data-gizi") ||
+      pathname.startsWith("/riwayat-pemeriksaan") ||
+      pathname.startsWith("/rujukan") ||
+      pathname.startsWith("/puskesmas") ||
+      pathname.startsWith("/orang-tua");
+
+    if (isOtherRoleRoute) {
+      return NextResponse.redirect(new URL("/dinkes", request.url));
     }
   }
 

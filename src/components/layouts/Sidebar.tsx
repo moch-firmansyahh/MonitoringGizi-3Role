@@ -35,7 +35,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Deteksi role aktif berdasarkan props atau pathname
   const activeRole: RolePengguna =
     role ||
-    (pathname.startsWith("/puskesmas")
+    (pathname.startsWith("/dinkes")
+      ? "dinkes"
+      : pathname.startsWith("/puskesmas")
       ? "puskesmas"
       : pathname.startsWith("/orang-tua")
       ? "orang_tua"

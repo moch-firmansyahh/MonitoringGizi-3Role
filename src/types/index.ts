@@ -1,7 +1,7 @@
 // src/types/index.ts
 // Single Source of Truth untuk Data Models & API Contracts SimGizi Multi-Role
 
-export type RolePengguna = "posyandu" | "puskesmas" | "orang_tua";
+export type RolePengguna = "posyandu" | "puskesmas" | "orang_tua" | "dinkes";
 export type JenisKelamin = "L" | "P";
 export type StatusGizi = "normal" | "gizi_kurang" | "gizi_buruk" | "stunting";
 export type TingkatRisiko = "rendah" | "sedang" | "tinggi";
@@ -14,6 +14,20 @@ export type JenisNotifikasi =
   | "rujukan_status"
   | "jadwal_pengingat"
   | "peringatan_stunting";
+
+export interface AuditLogItem {
+  id: string;
+  eventId: string;
+  eventType: string;
+  routingKey: string;
+  timestamp: string;
+  producer: "posyandu" | "puskesmas" | "sistem";
+  ringkasan: string;
+  namaAnak?: string;
+  faskes?: string;
+  status?: string;
+  data: Record<string, unknown>;
+}
 
 // 1. ENTITAS FASKES
 export interface Puskesmas {

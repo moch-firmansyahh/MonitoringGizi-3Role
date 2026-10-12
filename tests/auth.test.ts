@@ -5,7 +5,7 @@ import { RolePengguna } from "@/types";
 
 describe("Sistem Autentikasi & Otorisasi Multi-Role", () => {
   describe("Kredensial Profil Demo", () => {
-    it("memiliki 6 akun resmi terdaftar (2 Posyandu, 2 Puskesmas, 2 Orang Tua)", () => {
+    it("memiliki 7 akun resmi terdaftar (2 Posyandu, 2 Puskesmas, 2 Orang Tua, 1 Dinkes)", () => {
       const keys = Object.keys(DEMO_PROFILES);
       expect(keys).toContain("kelompok2");
       expect(keys).toContain("posyandu_mekarsari01");
@@ -13,7 +13,8 @@ describe("Sistem Autentikasi & Otorisasi Multi-Role", () => {
       expect(keys).toContain("puskesmas_dayeuhkolot");
       expect(keys).toContain("orangtua_arfan");
       expect(keys).toContain("orangtua_aisyah");
-      expect(keys.length).toBe(6);
+      expect(keys).toContain("dinkes_bandung");
+      expect(keys.length).toBe(7);
     });
 
     it("memiliki pemetaan role yang valid dan terpisah untuk setiap profil pengguna", () => {
@@ -28,16 +29,20 @@ describe("Sistem Autentikasi & Otorisasi Multi-Role", () => {
       // 2 Orang Tua
       expect(DEMO_PROFILES.orangtua_arfan.role).toBe("orang_tua");
       expect(DEMO_PROFILES.orangtua_aisyah.role).toBe("orang_tua");
+
+      // 1 Dinkes
+      expect(DEMO_PROFILES.dinkes_bandung.role).toBe("dinkes");
     });
   });
 
   describe("Navigasi & Isolasi Antarmuka", () => {
-    const roles: RolePengguna[] = ["posyandu", "puskesmas", "orang_tua"];
+    const roles: RolePengguna[] = ["posyandu", "puskesmas", "orang_tua", "dinkes"];
 
     it("menyediakan landing page spesifik untuk setiap role", () => {
       expect(ROLE_HOMEPAGE.posyandu).toBe("/");
       expect(ROLE_HOMEPAGE.puskesmas).toBe("/puskesmas");
       expect(ROLE_HOMEPAGE.orang_tua).toBe("/orang-tua");
+      expect(ROLE_HOMEPAGE.dinkes).toBe("/dinkes");
     });
 
     it("memiliki rute navigasi yang terpisah tanpa cross-access rute internal", () => {
@@ -58,6 +63,10 @@ describe("Sistem Autentikasi & Otorisasi Multi-Role", () => {
       // Orang tua navigasi harus di bawah prefix /orang-tua
       const orangTuaHrefs = ROLE_NAV_ITEMS.orang_tua.map((item) => item.href);
       expect(orangTuaHrefs.every((h) => h.startsWith("/orang-tua"))).toBe(true);
+
+      // Dinkes navigasi harus di bawah prefix /dinkes
+      const dinkesHrefs = ROLE_NAV_ITEMS.dinkes.map((item) => item.href);
+      expect(dinkesHrefs.every((h) => h.startsWith("/dinkes"))).toBe(true);
     });
   });
 });

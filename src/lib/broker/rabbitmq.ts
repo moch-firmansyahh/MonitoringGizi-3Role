@@ -8,6 +8,7 @@ import {
   BROKER_ROUTING_KEYS,
   BaseEventPayload,
 } from "./events";
+import { auditRepository } from "@/lib/repositories/audit.repository";
 
 const RABBITMQ_URL =
   process.env.RABBITMQ_URL || "amqp://simgizi:simgizi2026@localhost:5672";
@@ -119,6 +120,9 @@ export async function publishBrokerEvent<T>(
   };
 
   try {
+    // Simpan ke log audit lokal terintegrasi
+    auditRepository.recordEvent(payload as BaseEventPayload<unknown>).catch(() => {});
+
     const ch = await getBrokerChannel();
     if (!ch) {
       // Fail-Safe: Broker offline, pesan dicatat secara aman
